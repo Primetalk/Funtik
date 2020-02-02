@@ -14,15 +14,15 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ++= Seq("-Yrangepos")
 )
 
-lazy val funtik = (project in file("funtik")).settings(
-  commonSettings,
-  name := "funtik",
-)
-
 lazy val environment = (project in file("environment")).settings(
   commonSettings,
   name := "environment"
 )
+
+lazy val funtik = (project in file("funtik")).settings(
+  commonSettings,
+  name := "funtik",
+).dependsOn(environment)
 
 lazy val root = (project in file(".")).
   aggregate(environment, funtik).
