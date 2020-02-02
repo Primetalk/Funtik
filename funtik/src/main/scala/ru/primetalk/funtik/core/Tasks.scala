@@ -15,4 +15,5 @@ trait Tasks extends  EnvironmentModel {
   case class BringAnObject(attributes: List[ObjectSpecification]) extends Task
 
   val task: Task = BringAnObject(List(ObjectName("red ball"), LocationInfo(myRoom)))
+
 }
