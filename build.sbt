@@ -24,8 +24,13 @@ lazy val funtik = (project in file("funtik")).settings(
   name := "funtik",
 ).dependsOn(environment)
 
+lazy val funtikScaffolding = (project.enablePlugins(ScalaJSPlugin) in file("funtik-scaffolding")).settings(
+  commonSettings,
+  name := "funtik-scaffolding",
+).dependsOn(environment, funtik)
+
 lazy val root = (project in file(".")).
-  aggregate(environment, funtik).
+  aggregate(environment, funtik, funtikScaffolding).
   settings(
     aggregate in update := false,
     publishArtifact := false

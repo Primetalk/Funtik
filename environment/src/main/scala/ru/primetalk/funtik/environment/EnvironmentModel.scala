@@ -31,7 +31,7 @@ trait EnvironmentModel {
 //  case object Door extends Material
 //
 //  sealed trait Content extends ObjectAtPosition
-//  case class EnvironmentObject(name: String) extends Content
+  case class EnvironmentObject(name: String) //extends Content
 //  case object UnidentifiedEnvironmentObject extends Content
 //  case object MovableObject extends Material
 
@@ -40,7 +40,8 @@ trait EnvironmentModel {
 
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)
-  val initialState = RobotState(Point2D(0,0), 0.0, Map(), Map())
+  // initially robot is at the dock station and has no map
+  val initialState: RobotState = RobotState(Point2D(0,0), 0.0, Map(), Map())
   // 1. Generate full map
   // 2. Walk robot around
   // 3. Render grey levels
