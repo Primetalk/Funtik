@@ -23,7 +23,8 @@ trait EnvironmentModel {
     }
   }
   type PointMap = Map[Point2D, PassByStatistics]
-  type WorldPointMap = Map[Point2D, Boolean] // Boolean - wall/free
+  type WorldPointMap = Display[Boolean]
+//  type WorldPointMap = Map[Point2D, Boolean] // Boolean - wall/free
 //  sealed trait ObjectAtPosition
 //  sealed trait Material extends ObjectAtPosition
 //  case object Floor extends Material
