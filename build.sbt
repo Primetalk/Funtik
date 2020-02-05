@@ -27,6 +27,14 @@ lazy val funtik = (project in file("funtik")).settings(
 lazy val funtikScaffolding = (project.enablePlugins(ScalaJSPlugin) in file("funtik-scaffolding")).settings(
   commonSettings,
   name := "funtik-scaffolding",
+  libraryDependencies ++= Seq(
+    "org.scala-js" %%% "scalajs-dom" % "0.9.7",
+//    "org.querki" %%% "jquery-facade" % "1.2",
+    "org.specs2" %%% "specs2-core" % "4.8.1" % Test,
+    "org.specs2" %%% "specs2-scalacheck" % "4.8.1" % Test
+  ),
+//  jsDependencies += "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js",
+  scalaJSUseMainModuleInitializer := true
 ).dependsOn(environment, funtik)
 
 lazy val root = (project in file(".")).
