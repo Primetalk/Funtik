@@ -14,12 +14,13 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ++= Seq("-Yrangepos")
 )
 
-lazy val environment = (project in file("environment")).settings(
+// TODO: use sbt-crossproject plugin
+lazy val environment = (project.enablePlugins(ScalaJSPlugin) in file("environment")).settings(
   commonSettings,
   name := "environment"
 )
 
-lazy val funtik = (project in file("funtik")).settings(
+lazy val funtik = (project.enablePlugins(ScalaJSPlugin) in file("funtik")).settings(
   commonSettings,
   name := "funtik",
 ).dependsOn(environment)
@@ -34,7 +35,8 @@ lazy val funtikScaffolding = (project.enablePlugins(ScalaJSPlugin) in file("funt
     "org.specs2" %%% "specs2-scalacheck" % "4.8.1" % Test
   ),
 //  jsDependencies += "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js",
-  scalaJSUseMainModuleInitializer := true
+  scalaJSUseMainModuleInitializer := true,
+  mainClass := Some("ru.primetalk.funtik.environment.Main")
 ).dependsOn(environment, funtik)
 
 lazy val root = (project in file(".")).

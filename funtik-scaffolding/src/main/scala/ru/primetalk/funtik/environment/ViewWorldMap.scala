@@ -3,8 +3,11 @@ import org.scalajs.dom
 import org.scalajs.dom.ext.Color
 import ru.primetalk.funtik.environment.EnvironmentModel
 
+import scala.collection.immutable.HashMap
+
 trait View[T] {
   def render(t: T, ctx: dom.CanvasRenderingContext2D): Unit
+  HashMap
 }
 object ViewWorldMap extends EnvironmentModel {
   implicit class ViewWorldMap[T](colorFun: T => Color) extends View[Display[T]] {
