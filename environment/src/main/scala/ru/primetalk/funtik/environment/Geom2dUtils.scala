@@ -45,6 +45,22 @@ object Geom2dUtils {
     def coordinatePoints: Seq[Position] = Seq(topLeft, bottomRight)
 
     def bottomRight: Position = topLeft + size - (1, 1)
+
+    def startX: Int = topLeft._1
+
+    def startY: Int = topLeft._2
+
+    def endX: Int = bottomRight._1
+
+    def endY: Int = bottomRight._2
+
+    def width: Int = size._1
+
+    def height: Int = size._2
+
+    def width2heightRatio: Double = width.toDouble / height
+
+    def height2widthRatio: Double = height.toDouble / width
   }
   /** It's a matrix:
     *  /     \
@@ -60,7 +76,7 @@ object Geom2dUtils {
   val rotateId    = Matrix2d( 1, 0, 0, 1)
   val rotate180   = Matrix2d(-1, 0, 0,-1)
 
-  val rotations = List(rotateId, rotateRight, rotate180, rotateLeft)
+  val rotations: List[Matrix2d] = List(rotateId, rotateRight, rotate180, rotateLeft)
 
   implicit class Matrix2dOps(rot: Matrix2d) {
     def apply(p: Vector2d): Vector2d = (
