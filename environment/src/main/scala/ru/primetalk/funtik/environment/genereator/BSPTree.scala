@@ -3,8 +3,6 @@ package ru.primetalk.funtik.environment.genereator
 import ru.primetalk.funtik.environment.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator.utils.{ManagedRandom, ScalaRandom}
 
-trait WithRandom {}
-
 /**
   * @see https://en.wikipedia.org/wiki/Binary_space_partitioning
   */
