@@ -222,11 +222,11 @@ object Display {
       .forall{ case (a,b) => a.sameElements(b) }
   }
 
-  def showPoints(points: Seq[Position], pointChar: Char): Display[Char] = {
+  def showPoints[T: ClassTag](points: Seq[Position], point: T, empty: T): Display[T] = {
     val rect = Geom2dUtils.boundingRect(points)
-    val d = Display[Char](rect)
-    d.fillAll(' ')
-    points.foreach(p => d(p) = pointChar)
+    val d = Display[T](rect)
+    d.fillAll(empty)
+    points.foreach(p => d(p) = point)
     d
   }
 }

@@ -1,20 +1,17 @@
 package ru.primetalk.funtik.environment
 import org.scalajs.dom
 import org.scalajs.dom.ext.Color
-import ru.primetalk.funtik.environment.EnvironmentModel
-
-import scala.collection.immutable.HashMap
 
 trait View[T] {
   def render(t: T, ctx: dom.CanvasRenderingContext2D): Unit
-  HashMap
 }
+
 object ViewWorldMap extends EnvironmentModel {
-  implicit class ViewWorldMap[T](colorFun: T => Color) extends View[Display[T]] {
+  class ViewWorldMapImpl[T](colorFun: T => Color) extends View[Display[T]] {
     def render(display: Display[T], ctx: dom.CanvasRenderingContext2D): Unit = {
 //      ctx.scale(ctx.canvas.width * 1.0/t.size._1, ctx.canvas.height * 1.0/t.size._2)
 //      ctx.offset(display.offset._1, display.offset._2)
-      ctx.setTransform(ctx.canvas.width * 1.0/display.size._1, 0, 0, ctx.canvas.height * 1.0/display.size._2, -display.offset._1, -display.offset._2)
+      ctx.setTransform(ctx.canvas.width * 1.0/(display.size._1 + 1), 0, 0, ctx.canvas.height * 1.0/(display.size._2 + 1), -display.offset._1, -display.offset._2)
       for {
         p <- display.points
       } {
