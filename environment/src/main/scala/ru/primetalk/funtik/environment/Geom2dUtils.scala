@@ -36,6 +36,24 @@ object Geom2dUtils {
     Rectangle(topLeft, bottomRight - topLeft + (1, 1))
   }
 
+  sealed trait Axis {
+    def transpose: Axis
+    def rotate(point: Position): Position
+  }
+
+  case object Horizontal extends Axis {
+    override def transpose: Axis = Vertical
+
+    override def rotate(point: Position): Position = point
+  }
+
+  case object Vertical extends Axis {
+    override def transpose: Axis = Horizontal
+
+    override def rotate(point: Position): Position = point.swap
+  }
+
+
   /** Origin is in top left corner. */
   case class Rectangle(topLeft: Position, size: Vector2d) {
 
@@ -50,6 +68,27 @@ object Geom2dUtils {
 
     def startY: Int = topLeft._2
 
+    def start(axis: Axis): Int = axis match {
+      case Horizontal => startX
+      case Vertical => startY
+    }
+
+
+    def sideSize(axis: Axis): Int = axis match {
+      case Horizontal => height
+      case Vertical => width
+    }
+
+    def getLongestAxis: Option[Axis] = {
+      if (height > width) {
+        Some(Vertical)
+      } else if (width > height) {
+        Some(Horizontal)
+      } else {
+        None
+      }
+    }
+
     def endX: Int = bottomRight._1
 
     def endY: Int = bottomRight._2
@@ -61,6 +100,33 @@ object Geom2dUtils {
     def width2heightRatio: Double = width.toDouble / height
 
     def height2widthRatio: Double = height.toDouble / width
+
+    def split(axis: Axis, firstAxisSize: Int): (Rectangle, Rectangle) = {
+
+      val firstSize = axis match {
+        case Horizontal => (width, firstAxisSize)
+        case Vertical => (firstAxisSize, height)
+      }
+      val first = Rectangle(topLeft, firstSize)
+
+      val secondStart = axis match {
+        case Horizontal =>
+          (startX, startY + firstAxisSize - 1)
+        case Vertical =>
+          (startX + firstAxisSize - 1, startY)
+      }
+
+      val secondSize = axis match {
+        case Horizontal =>
+          (width, height - firstAxisSize + 1)
+        case Vertical =>
+          (width - firstAxisSize + 1, height)
+      }
+      val second = Rectangle(secondStart, secondSize)
+
+      first -> second
+    }
+
   }
   /** It's a matrix:
     *  /     \
