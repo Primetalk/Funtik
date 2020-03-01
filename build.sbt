@@ -28,17 +28,17 @@ lazy val funtik = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pur
   name := "funtik",
 ).dependsOn(environment)
 
-lazy val funtikScaffolding = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("funtik-scaffolding")).settings(
+lazy val funtikScaffolding = (crossProject(JSPlatform).crossType(CrossType.Pure) in file("funtik-scaffolding")).settings(
   commonSettings,
   name := "funtik-scaffolding"
 ).jsSettings(
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.7", // 1.0.0",
+    "org.scala-js" %%% "scalajs-dom" % "1.0.0",
     "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
     "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
   ),
   scalaJSUseMainModuleInitializer := true,
-  mainClass := Some("ru.primetalk.funtik.environment.Main")
+  mainClass := Some("ru.primetalk.funtik.environment.Funtik")
 ).dependsOn(environment, funtik)
 
 lazy val root = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file(".")).
