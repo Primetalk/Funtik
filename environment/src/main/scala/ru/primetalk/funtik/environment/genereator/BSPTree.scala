@@ -13,8 +13,8 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
     splitter.split(bound) match {
       case None =>
         RoomNode(bound)
-      case Some((f, s)) =>
-        SpaceTreeNode(bound, generate(f), generate(s))
+      case Some((f, s, d)) =>
+        SpaceTreeNode(bound, generate(f), generate(s), d)
     }
   }
 
@@ -42,12 +42,13 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
   }
 
   sealed abstract class Splitter(canContinue: Boolean){
-    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle)]
+
+    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle, Door)]
   }
 
   case class HorizontalSplitter(height: Int) extends Splitter(true) {
 
-    def split(sourceRect: Rectangle): Option[(Rectangle, Rectangle)] = {
+    def split(sourceRect: Rectangle): Option[(Rectangle, Rectangle, Door)] = {
       val splitPosition  = random.between(minSideSize, height - minSideSize)
 
       val topSize = (sourceRect.width, splitPosition)
@@ -60,13 +61,14 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
         sourceRect.width -> bottomHeight
       )
 
-      Some(top -> bottom)
+      val door = Door(bottom.startX + 1, bottomStartY)
+      Some((top, bottom, door))
     }
   }
 
   case class VerticalSplitter(width: Int) extends Splitter(true) {
 
-    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle)] = {
+    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle, Door)] = {
       val splitPosition  = random.between(minSideSize, width - minSideSize)
 
       val leftSize = splitPosition -> rectangle.height
@@ -79,13 +81,14 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
         rightWidth -> rectangle.height
       )
 
-      Some(left -> right)
+      val door = Door(rightStartX, right.startY + 2)
+      Some((left, right, door))
     }
   }
 
   case object TooSmall extends Splitter(false){
 
-    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle)] = None
+    def split(rectangle: Rectangle): Option[(Rectangle, Rectangle, Door)] = None
   }
 
 

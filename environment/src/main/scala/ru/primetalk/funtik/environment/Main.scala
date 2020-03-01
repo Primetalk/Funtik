@@ -9,7 +9,7 @@ object Main extends App{
   val size =  30
   val rect = Rectangle(0 -> 0, size -> size)
 
-  val partitionedSpace = new BSPTree(minSideSize = 7).generate(rect)
+  val partitionedSpace = new BSPTree(minSideSize = 6).generate(rect)
 
 
   val array: Array[Array[String]] = Array.ofDim[String](rect.width, rect.height)
@@ -22,8 +22,6 @@ object Main extends App{
   }
 
   fillArray(partitionedSpace)
-//  writeRect(rect, ". ")
-
 
   val string = array.map(_.mkString).mkString("\n")
   println(partitionedSpace)
@@ -38,6 +36,7 @@ object Main extends App{
       case s: SpaceTreeNode =>
         fillArray(s.left)
         fillArray(s.right)
+        array(s.door.y)(s.door.x) = "0 "
       case r : RoomNode =>
         writeRect(r.rect, "  ")
 
