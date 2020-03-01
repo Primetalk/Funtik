@@ -9,11 +9,6 @@ import ru.primetalk.funtik.environment.genereator.utils.{ManagedRandom, ScalaRan
 class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
 
   def generate(boundRect: Rectangle): SpaceTree = {
-//    trySplit(bound)
-    //    val tooWide = rect.width2heightRatio >= sidesMaxRatio
-    //    val tooHigh = rect.height2widthRatio >= sidesMaxRatio
-    //    val splitHorizontally = (tooWide && !tooHigh) || random.nextBoolean
-
     def randomAxis = if(random.nextBoolean) Horizontal else Vertical
     val splitAxis = boundRect.getLongestAxis.map(_.transpose).getOrElse(randomAxis)
     val sideSize = boundRect.sideSize(splitAxis)
