@@ -1,12 +1,15 @@
-package ru.primetalk.funtik.environment
+package ru.primetalk.funtik.environment.geom2d
 
-object Geom2dUtils {
-  type Position = (Int, Int)
-  type Vector2d = (Int, Int)
-  type Direction = Vector2d
+
+trait Geom2dUtils[V] extends Vector2dSyntax[V] {
+  type Vector = V
+  type Position = Vector
+  type Direction = Vector
+
+  implicit val vector2d: Vector2d[Vector]
 
   case class DirVector(direction: Direction, length: Int) {
-    def toVector2d: Vector2d = direction * length
+    def toVector2d: Vector = direction * length
     def isHorizontal: Boolean = direction._2 == 0
     def isVertical: Boolean = direction._1 == 0
     /** converts line segment to points.
@@ -33,40 +36,33 @@ object Geom2dUtils {
   }
 
   def rectangleByDiagonal(topLeft: Position, bottomRight: Position): Rectangle = {
-    Rectangle(topLeft, bottomRight - topLeft + (1, 1))
+    Rectangle(topLeft, bottomRight - topLeft + vector2d(1, 1))
   }
 
   /** Origin is in top left corner. */
-  case class Rectangle(topLeft: Position, size: Vector2d) {
+  case class Rectangle(topLeft: Position, size: Vector) {
 
     def area: Long =
       size._1 * size._2
 
     def coordinatePoints: Seq[Position] = Seq(topLeft, bottomRight)
 
-    def bottomRight: Position = topLeft + size - (1, 1)
+    def bottomRight: Position = topLeft + size - vector2d(1, 1)
   }
-  /** It's a matrix:
-    *  /     \
-    *  | a b |
-    *  | c d |
-    *  \     /
-    */
-  case class Matrix2d(a: Int, b: Int, c: Int, d: Int)
 
   // Here is the group of rotations by 90 degrees:
-  val rotateRight = Matrix2d( 0, 1,-1, 0)
-  val rotateLeft  = Matrix2d( 0,-1, 1, 0)
-  val rotateId    = Matrix2d( 1, 0, 0, 1)
-  val rotate180   = Matrix2d(-1, 0, 0,-1)
+  val rotateRight: Matrix2d = Matrix2d( 0, 1,-1, 0)
+  val rotateLeft: Matrix2d  = Matrix2d( 0,-1, 1, 0)
+  val rotateId: Matrix2d    = Matrix2d( 1, 0, 0, 1)
+  val rotate180: Matrix2d   = Matrix2d(-1, 0, 0,-1)
 
   val rotations = List(rotateId, rotateRight, rotate180, rotateLeft)
 
   implicit class Matrix2dOps(rot: Matrix2d) {
-    def apply(p: Vector2d): Vector2d = (
+    def apply(p: Vector): Vector = (
       rot.a*p._1 + rot.b*p._2,
       rot.c*p._1 + rot.d*p._2
-    )
+    ).toVector
     def apply(other: Matrix2d): Matrix2d = Matrix2d(
       a = rot.a*other.a+rot.b*other.c, b = rot.a*other.b+rot.b*other.d,
       c = rot.c*other.a+rot.d*other.c, d = rot.c*other.b+rot.d*other.d
@@ -81,66 +77,31 @@ object Geom2dUtils {
     val xs = positions.map(_._1)
     val ys = positions.map(_._2)
     rectangleByDiagonal(
-      topLeft = (xs.min, ys.min),
-      bottomRight = (xs.max, ys.max)
+      topLeft = vector2d(xs.min, ys.min),
+      bottomRight = vector2d(xs.max, ys.max)
     )
   }
 
-  val origin: Position = (0, 0)
+  val origin: Position = vector2d(0, 0)
 
-  val Up: Direction = (0, +1)
-  val Down: Direction = (0, -1)
-  val Left: Direction = (-1, 0)
-  val Right: Direction = (1, 0)
+  val Up: Direction = vector2d(0, +1)
+  val Down: Direction = vector2d(0, -1)
+  val Left: Direction = vector2d(-1, 0)
+  val Right: Direction = vector2d(1, 0)
 
   lazy val mainDirections: Seq[Direction] = Seq(Up, Left, Down, Right)
   lazy val mainDirectionsInReadingOrder: Seq[Direction] = Seq(Up, Left, Right, Down)
   lazy val directions8: Seq[Direction] = mainDirections ++ Seq(Up + Right, Up + Left, Down + Left, Down + Right)
 
-  def mul(k: Int): Direction => Vector2d = {
-    case (x, y) => (x * k, y * k)
-  }
-
-  implicit class PosOps(p: Position) {
-    def +(vector: Vector2d): Position =
-      (p._1 + vector._1, p._2 + vector._2)
-    def -(vector: Vector2d): Position =
-      (p._1 - vector._1, p._2 - vector._2)
-  }
-
-  implicit class VecOps(v: Vector2d) {
-
-    def *(k: Int): Vector2d = v match {
-      case (x, y) => (x * k, y * k)
-    }
-
-    def transpose: Vector2d =
-      (v._2, v._1)
-
-    /** Rotates as a multiplication of complex numbers. */
-    def rotate(o: Vector2d): Vector2d =
-      (v._1 * o._1 - v._2 * o._2, v._1 * o._2 + v._2 * o._1)
-
-    def manhattanSize: Int = math.abs(v._1) + math.abs(v._2)
-
-    def r: Double =
-      math.sqrt(v._1*v._1 + v._2*v._2)
-
-    /** Theta is an angle from X axis towards the given vector.
-      * NB! The display has Y axis oriented down. So, in order to get normal
-      * theta we inverse Y.*/
-    def theta: Double = {
-      math.atan2(-v._2, v._1)
-    }
-
-  }
+  def mul(k: Int)(d: Direction): Vector =
+    vector2d(d.x * k, d.y * k)
 
   def manhattanDistance(p1: Position, p2: Position): Int = {
     math.abs(p1._1 - p2._1) + math.abs(p1._2 - p2._2)
   }
 
   val readingOrdering: Ordering[Position] =
-    (a: (Int, Int), b: (Int, Int)) => {
+    (a, b) => {
       val cmp1 = a._2 - b._2
       if(cmp1 != 0)
         cmp1
@@ -160,12 +121,12 @@ object Geom2dUtils {
     * It's also enough to describe it with just two points.
     */
   case class ManhattanEllipse(p1: Position, p2: Position) {
-    def size: Vector2d =
-      manhattanTransform(p2 - p1)
+    def size: Vector =
+      manhattanTransform(p2 - p1).toVector
   }
 
   def manhattanCircle(p: Position, r: Int): ManhattanEllipse = {
-    ManhattanEllipse(p - (r,0), p + (r,0))
+    ManhattanEllipse(p - vector2d(r,0), p + vector2d(r,0))
   }
 
   def charToDirection(c: Char): Direction = c match {
@@ -176,4 +137,8 @@ object Geom2dUtils {
   }
 
 
+}
+
+object Geom2dUtils extends  Geom2dUtils[(Int, Int)] {
+  implicit val vector2d: Vector2d[(Int, Int)] = Vector2dIntPair
 }

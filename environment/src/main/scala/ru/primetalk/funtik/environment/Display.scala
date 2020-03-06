@@ -1,6 +1,7 @@
 package ru.primetalk.funtik.environment
 
-import Geom2dUtils.{PosOps, Position, Rectangle, VecOps, Vector2d, directions8, mainDirections}
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils
+import Geom2dUtils.{Position, Rectangle, Vector, Vector2dOps, directions8, mainDirections, vector2d}
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -10,8 +11,8 @@ import scala.reflect.ClassTag
 // TODO: DrawDisplay on canvas (Scala.js)
 // TODO: Remove state. Mutable array could be provided from outside as an implicit context
 // TODO: Use refined type for array size,vector size.
-case class Display[T: ClassTag](offset: Vector2d, size: Vector2d)(init: Option[() => Array[Array[T]]] = None) {
-  lazy val rect = Rectangle(offset, size)
+case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() => Array[Array[T]]] = None) {
+  lazy val rect: Rectangle = Rectangle(offset, size)
 
   // initial: () => T = () => {implicitly[Numeric[T]].zero}
   /** We only allocate array when it's needed*/
