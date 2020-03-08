@@ -27,6 +27,55 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
     }
   }
 
+  /**
+   * An algorithm to draw pixels for a mathematical line.
+   * https://ru.wikipedia.org/wiki/Алгоритм_Брезенхэма
+   * {{{
+   *     function line(int x0, int x1, int y0, int y1)
+   *      int deltax := abs(x1 - x0)
+   *      int deltay := abs(y1 - y0)
+   *      int error := 0
+   *      int deltaerr := (deltay + 1)
+   *      int y := y0
+   *      int diry := y1 - y0
+   *      if diry > 0
+   *          diry = 1
+   *      if diry < 0
+   *          diry = -1
+   *      for x from x0 to x1
+   *          plot(x,y)
+   *          error := error + deltaerr
+   *          if error >= (deltax + 1)
+   *              y := y + diry
+   *              error := error - (deltax + 1)
+   * }}}
+   */
+  def bresenhamLine(x0: Double, y0: Double, x1: Double, y1: Double): List[Position] = {
+    val deltaX = math.abs(x1 - x0)
+    val deltaY = math.abs(y1 - y0)
+    val deltaErr = (deltaY + 1)
+    val dirX = if(x1 > x0) 1 else -1
+    val dirY = if(y1 > y0) 1 else -1
+    @scala.annotation.tailrec
+    def loop(x: Int, y: Int, error: Double, reversed: List[Position]): List[Position] = {
+      if(if(dirX > 0) x > x1.round else x < x1.round)
+        reversed.reverse
+      else {
+        val res1 = vector2d(x, y) :: reversed
+        val error1 = error + deltaErr
+
+        if(error1 >= deltaX + 1)
+          loop(x + dirX, y + dirY, error1 - (deltaX + 1), res1)
+        else
+          loop(x + dirX, y, error1, res1)
+      }
+    }
+    if(deltaX >= deltaY)
+      loop(x0.round.toInt, y0.round.toInt, y0 - y0.round, Nil)
+    else
+      bresenhamLine(y0, x0, y1, x1).map(_.transpose)
+  }
+
   case class LineSegment(start: Position, dirVector: DirVector) {
     def end: Position = start + dirVector.toVector2d
     /** converts line segment to points.
@@ -140,5 +189,5 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
 }
 
 object Geom2dUtils extends  Geom2dUtils[(Int, Int)] {
-  implicit val vector2d: Vector2d[(Int, Int)] = Vector2dIntPair
+  implicit lazy val vector2d: Vector2d[(Int, Int)] = Vector2dIntPair
 }
