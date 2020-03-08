@@ -21,7 +21,18 @@ lazy val environment =
   (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("environment")).settings(
   commonSettings,
   name := "environment"
-)
+).jsSettings(
+    libraryDependencies ++= Seq(
+      "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
+      "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
+    )
+  ).jvmSettings(
+    libraryDependencies ++= Seq(
+      "org.specs2" %% "specs2-core" % "4.8.3" % Test,
+      "org.specs2" %% "specs2-scalacheck" % "4.8.3" % Test
+    )
+
+  )
 
 lazy val funtik = (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("funtik")).settings(
   commonSettings,
