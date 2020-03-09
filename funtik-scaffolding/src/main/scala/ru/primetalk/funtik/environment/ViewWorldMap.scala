@@ -9,9 +9,24 @@ trait View[T] {
 object ViewWorldMap extends EnvironmentModel {
   class ViewWorldMapImpl[T](colorFun: T => Color) extends View[Display[T]] {
     def render(display: Display[T], ctx: dom.CanvasRenderingContext2D): Unit = {
-//      ctx.scale(ctx.canvas.width * 1.0/t.size._1, ctx.canvas.height * 1.0/t.size._2)
-//      ctx.offset(display.offset._1, display.offset._2)
-      ctx.setTransform(ctx.canvas.width * 1.0/(display.size._1 + 1), 0, 0, ctx.canvas.height * 1.0/(display.size._2 + 1), -display.offset._1, -display.offset._2)
+      val scaleX = ctx.canvas.width * 1.0/(display.size._1 + 1)
+      val scaleY = ctx.canvas.height * 1.0/(display.size._2 + 1)
+      object scaleXYMatrix {
+        val (a, b) = (scaleX, 0)
+        val (c, d) = (0, scaleY)
+      }
+      object offset {
+        val (dx, dy) = (-display.offset._1, -display.offset._2)
+      }
+      val m = scaleXYMatrix
+      // `setTransform` is expected to be equivalent to
+      //      ctx.scale(scaleX, scaleY)
+      //      ctx.offset(display.offset._1, display.offset._2)
+      ctx.setTransform(
+        m.a, m.b,
+        m.c, m.d,
+        offset.dx, offset.dy)
+
       for {
         p <- display.points
       } {
