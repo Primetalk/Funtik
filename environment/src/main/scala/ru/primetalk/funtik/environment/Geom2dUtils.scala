@@ -36,22 +36,13 @@ object Geom2dUtils {
     Rectangle(topLeft, bottomRight - topLeft + (1, 1))
   }
 
-  sealed trait Axis {
-    def transpose: Axis
-    def rotate(point: Position): Position
+  def transpose(axis: Axis):Axis = {
+    case Horizontal => Vertical
+    case Vertical => Horizontal
   }
-
-  case object Horizontal extends Axis {
-    override def transpose: Axis = Vertical
-
-    override def rotate(point: Position): Position = point
-  }
-
-  case object Vertical extends Axis {
-    override def transpose: Axis = Horizontal
-
-    override def rotate(point: Position): Position = point.swap
-  }
+  sealed trait Axis
+  case object Horizontal extends Axis
+  case object Vertical extends Axis
 
 
   /** Origin is in top left corner. */
@@ -101,6 +92,7 @@ object Geom2dUtils {
 
     def height2widthRatio: Double = height.toDouble / width
 
+    //TODO: split onto N rectangles
     def split(axis: Axis, firstAxisSize: Int): (Rectangle, Rectangle) = {
 
       val firstSize = axis match {
@@ -124,7 +116,7 @@ object Geom2dUtils {
       }
       val second = Rectangle(secondStart, secondSize)
 
-      first -> second
+      (first, second)
     }
 
   }

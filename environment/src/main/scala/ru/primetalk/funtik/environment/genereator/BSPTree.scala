@@ -10,7 +10,7 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
 
   def generate(boundRect: Rectangle): SpaceTree = {
     def randomAxis = if(random.nextBoolean) Horizontal else Vertical
-    val splitAxis = boundRect.getLongestAxis.map(_.transpose).getOrElse(randomAxis)
+    val splitAxis = boundRect.getLongestAxis.map(transpose).getOrElse(randomAxis)
     val sideSize = boundRect.sideSize(splitAxis)
     val restSideSize = sideSize - minSideSize
     if (restSideSize > minSideSize) {
@@ -27,7 +27,7 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
       case Horizontal => Door(second.startX + 1, second.startY)
       case Vertical => Door(second.startX, second.startY + 1)
     }
-    SpaceTreeNode(sourceRect, generate(first), generate(second), door)
+    SpaceTreeNode(generate(first), generate(second), door)
   }
 }
 
