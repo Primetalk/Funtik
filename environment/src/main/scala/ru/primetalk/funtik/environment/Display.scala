@@ -3,6 +3,7 @@ package ru.primetalk.funtik.environment
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils
 import Geom2dUtils.{Direction, Position, Rectangle, Vector, Vector2dOps, directions8, mainDirections, vector2d}
 import ru.primetalk.funtik.environment.graph.GraphUtils
+import ru.primetalk.funtik.environment.graph.CollectionUtils
 import ru.primetalk.funtik.environment.graph.GraphUtils.GraphAsFunction
 
 import scala.annotation.tailrec
@@ -165,6 +166,11 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
     }
   }
 
+  def draw(positions: List[Position], t: T): Unit =
+    for{ p <- position} {
+      this(p) = t
+    }
+
   /** Fill display with the given value.*/
   def fillAll(value: => T): Unit = {
     def arr = Array.fill(size._1)(value)
@@ -243,8 +249,20 @@ object Display {
       filter(p => isFreeCell(d(p)))
 
   // finds all not connected parts of the graph.
-  def connectedComponents[T](d: Display[T], directions: List[Direction], isFreeCell: T => Boolean): List[Set[Position]] = {
+  def connectedComponents2[T](d: Display[T], directions: List[Direction], isFreeCell: T => Boolean): List[Set[Position]] = {
     val g = displayAsGraph(d, directions, isFreeCell)
     GraphUtils.connectedComponents(d.pointsFiltered(isFreeCell), g)
+  }
+
+  def connectAllSomehow[T](d: Display[T], directions: List[Direction], freeCell: T): Unit = {
+    val components = connectedComponents2(d, directions, (_: T) == freeCell)
+    val componentsAsLists: List[List[Position]] = components.map(_.toList)
+    val pairsOfComponents: List[List[List[Position]]] = componentsAsLists.sliding(2, 1).toList
+    pairsOfComponents.foreach{
+      case List(lst1, lst2) =>
+        val (p1, p2, _) = CollectionUtils.almostShortestDistance[Position](lst1, lst2, a => b => Geom2dUtils.manhattanDistance(a, b))
+        val positions = Geom2dUtils.bresenhamLine(p1.x + 0.5, p1.y + 0.5, p2.x + 0.5, p2.y + 0.5)
+        positions.foreach{ p => d(p) = freeCell }
+    }
   }
 }
