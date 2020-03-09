@@ -128,12 +128,24 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
   def manhattanCircle(p: Position, r: Int): ManhattanEllipse = {
     ManhattanEllipse(p - vector2d(r,0), p + vector2d(r,0))
   }
-
+  /**
+   * This method converts a one-char representation of direction to
+   * ordinary Direction. It could be used for short representation of a path:
+   * {{{
+   *   ULLLUULDDD
+   * }}}
+   *
+   * or
+   * {{{
+   *   U1L3U2L1D3
+   * }}}
+   */
   def charToDirection(c: Char): Direction = c match {
     case 'U' => Up
     case 'D' => Down
     case 'L' => Left
     case 'R' => Right
+    case _ => throw new IllegalArgumentException(s"Unsupported short direction char '$c'")
   }
 
 
