@@ -11,7 +11,6 @@ class Controller
   val ctx: dom.CanvasRenderingContext2D,
   val gameView: View[Display[Boolean]]
 ) {
-  // The following are the only two variables in the program
   private val rnd = new Random()
   private var currentGameState: Display[Boolean] = generateDisplay(rnd.nextInt())
 

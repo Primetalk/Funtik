@@ -53,7 +53,7 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
   def bresenhamLine(x0: Double, y0: Double, x1: Double, y1: Double): List[Position] = {
     val deltaX = math.abs(x1 - x0)
     val deltaY = math.abs(y1 - y0)
-    val deltaErr = (deltaY + 1)
+    val deltaErr = deltaY + 1
     val dirX = if(x1 > x0) 1 else -1
     val dirY = if(y1 > y0) 1 else -1
     @scala.annotation.tailrec
@@ -97,6 +97,10 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
 
     def area: Long =
       size._1 * size._2
+
+    def width: Int = size.x
+
+    def height: Int = size.y
 
     def coordinatePoints: Seq[Position] = Seq(topLeft, bottomRight)
 
@@ -192,12 +196,24 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
   def manhattanCircle(p: Position, r: Int): ManhattanEllipse = {
     ManhattanEllipse(p - vector2d(r,0), p + vector2d(r,0))
   }
-
+  /**
+   * This method converts a one-char representation of direction to
+   * ordinary Direction. It could be used for short representation of a path:
+   * {{{
+   *   ULLLUULDDD
+   * }}}
+   *
+   * or
+   * {{{
+   *   U1L3U2L1D3
+   * }}}
+   */
   def charToDirection(c: Char): Direction = c match {
     case 'U' => Up
     case 'D' => Down
     case 'L' => Left
     case 'R' => Right
+    case _ => throw new IllegalArgumentException(s"Unsupported short direction char '$c'")
   }
 
 

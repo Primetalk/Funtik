@@ -167,7 +167,7 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
   }
 
   def draw(positions: List[Position], t: T): Unit =
-    for{ p <- position} {
+    for{ p <- positions } {
       this(p) = t
     }
 

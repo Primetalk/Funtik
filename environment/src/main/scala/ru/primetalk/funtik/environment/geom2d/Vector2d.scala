@@ -7,41 +7,44 @@ trait Vector2d[V] {
   def unapply(v: V): (Int, Int) = (getAxisValue(v, Axis2d.Abscissa), getAxisValue(v, Axis2d.Ordinate))
 }
 
-trait Vector2dSyntax[V] {
-  implicit class Vector2dOps(v: V)(implicit vector2d: Vector2d[V]){
-    def x: Int = vector2d.getAxisValue(v, Axis2d.Abscissa)
-    def y: Int = vector2d.getAxisValue(v, Axis2d.Ordinate)
-    def _1: Int = vector2d.getAxisValue(v, Axis2d.Abscissa)
-    def _2: Int = vector2d.getAxisValue(v, Axis2d.Ordinate)
+trait Vector2dSyntax[Vector] {
+  implicit class Vector2dOps(vector: Vector)(implicit vector2d: Vector2d[Vector]){
+    def x: Int = vector2d.getAxisValue(vector, Axis2d.Abscissa)
+    def y: Int = vector2d.getAxisValue(vector, Axis2d.Ordinate)
+    def _1: Int = vector2d.getAxisValue(vector, Axis2d.Abscissa)
+    def _2: Int = vector2d.getAxisValue(vector, Axis2d.Ordinate)
 
-    def +(vector: V): V =
-      vector2d(_1 + vector._1, _2 + vector._2)
-    def -(vector: V): V =
-      vector2d(_1 - vector._1, _2 - vector._2)
-    def *(k: Int): V = vector2d(x * k, y * k)
+    def +(vector: Vector): Vector =
+      vector2d(x + vector.x, y + vector.y)
+    def -(vector: Vector): Vector =
+      vector2d(x - vector.x, y - vector.y)
+    def *(k: Int): Vector = vector2d(x * k, y * k)
 
-    def transpose: V =
-      vector2d(v._2, v._1)
+    def transpose: Vector =
+      vector2d(vector.y, vector.x)
 
     /** Rotates as a multiplication of complex numbers. */
-    def rotate(o: V): V =
-      vector2d(v._1 * o._1 - v._2 * o._2, v._1 * o._2 + v._2 * o._1)
+    def rotate(other: Vector): Vector = {
+      val x = vector.x * other.x - vector.y * other.y
+      val y = vector.x * other.y + vector.y * other.x
+      vector2d(x, y)
+    }
 
-    def manhattanSize: Int = math.abs(v._1) + math.abs(v._2)
+    def manhattanSize: Int = math.abs(vector.x) + math.abs(vector.y)
 
     def r: Double =
-      math.sqrt(v._1*v._1 + v._2*v._2)
+      math.sqrt(vector.x * vector.x + vector.y * vector.y)
 
     /** Theta is an angle from X axis towards the given vector.
      * NB! The display has Y axis oriented down. So, in order to get normal
      * theta we inverse Y.*/
     def theta: Double = {
-      math.atan2(-v._2, v._1)
+      math.atan2(-vector.y, vector.x)
     }
   }
 
-  implicit class PairOps(p: (Int, Int))(implicit vector2d: Vector2d[V]){
-    def toVector: V = vector2d(p)
+  implicit class PairOps(p: (Int, Int))(implicit vector2d: Vector2d[Vector]){
+    def toVector: Vector = vector2d(p)
   }
 
 }
