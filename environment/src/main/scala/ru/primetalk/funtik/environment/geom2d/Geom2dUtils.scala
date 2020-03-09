@@ -76,6 +76,10 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       bresenhamLine(y0, x0, y1, x1).map(_.transpose)
   }
 
+  def line(from: Position, to: Position): List[Position] = {
+    bresenhamLine(from.x + 0.5, from.y + 0.5, to.x + 0.5, to.y + 0.5)
+  }
+
   case class LineSegment(start: Position, dirVector: DirVector) {
     def end: Position = start + dirVector.toVector2d
     /** converts line segment to points.
@@ -97,6 +101,17 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
     def coordinatePoints: Seq[Position] = Seq(topLeft, bottomRight)
 
     def bottomRight: Position = topLeft + size - vector2d(1, 1)
+
+    def topRight: Position = topLeft + vector2d(width - 1, 0)
+
+    def bottomLeft: Position = topLeft + vector2d(0, height - 1)
+
+    def edges: List[Position] = List(
+      line(topLeft, topRight),
+      line(topRight, bottomRight),
+      line(bottomRight, bottomLeft),
+      line(bottomLeft, topLeft)
+    ).flatten
   }
 
   // Here is the group of rotations by 90 degrees:
