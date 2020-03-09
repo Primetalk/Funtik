@@ -1,7 +1,9 @@
 package ru.primetalk.funtik.environment
 
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils
-import Geom2dUtils.{Position, Rectangle, Vector, Vector2dOps, directions8, mainDirections, vector2d}
+import Geom2dUtils.{Direction, Position, Rectangle, Vector, Vector2dOps, directions8, mainDirections, vector2d}
+import ru.primetalk.funtik.environment.graph.GraphUtils
+import ru.primetalk.funtik.environment.graph.GraphUtils.GraphAsFunction
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -42,11 +44,15 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
   def positionsAround(p: Position): Seq[Position] =
     directions8.map(_ + p).filter(isWithinRange)
 
-  def points: Seq[Position] =
-    for{
+  def points: List[Position] =
+    (for{
       j <- ys
       i <- xs
     } yield (i, j)
+      ).toList
+
+  def pointsFiltered(pred: T => Boolean): List[Position] =
+    points.filter(p => pred(apply(p)))
 
   def values: Seq[T] =
     for{
@@ -222,11 +228,23 @@ object Display {
       .forall{ case (a,b) => a.sameElements(b) }
   }
 
-  def showPoints(points: Seq[Position], pointChar: Char): Display[Char] = {
+  def showPoints[T: ClassTag](points: Seq[Position], point: T, empty: T): Display[T] = {
     val rect = Geom2dUtils.boundingRect(points)
-    val d = Display[Char](rect)
-    d.fillAll(' ')
-    points.foreach(p => d(p) = pointChar)
+    val d = Display[T](rect)
+    d.fillAll(empty)
+    points.foreach(p => d(p) = point)
     d
+  }
+
+  // displayAsGraph converts display to a graph.
+  def displayAsGraph[T](d: Display[T], directions: List[Direction], isFreeCell: T => Boolean): GraphAsFunction[Position] =
+    p => directions.
+      map(p + _).
+      filter(p => isFreeCell(d(p)))
+
+  // finds all not connected parts of the graph.
+  def connectedComponents[T](d: Display[T], directions: List[Direction], isFreeCell: T => Boolean): List[Set[Position]] = {
+    val g = displayAsGraph(d, directions, isFreeCell)
+    GraphUtils.connectedComponents(d.pointsFiltered(isFreeCell), g)
   }
 }
