@@ -14,18 +14,31 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ++= Seq("-Yrangepos")
 )
 
-lazy val environment = (project in file("environment")).settings(
+// TODO: use sbt-crossproject plugin
+lazy val environment = (project.enablePlugins(ScalaJSPlugin) in file("environment")).settings(
   commonSettings,
   name := "environment"
 )
 
-lazy val funtik = (project in file("funtik")).settings(
+lazy val funtik = (project.enablePlugins(ScalaJSPlugin) in file("funtik")).settings(
   commonSettings,
   name := "funtik",
 ).dependsOn(environment)
 
+lazy val funtikScaffolding = (project.enablePlugins(ScalaJSPlugin) in file("funtik-scaffolding")).settings(
+  commonSettings,
+  name := "funtik-scaffolding",
+  libraryDependencies ++= Seq(
+    "org.scala-js" %%% "scalajs-dom" % "0.9.7",
+    "org.specs2" %%% "specs2-core" % "4.8.1" % Test,
+    "org.specs2" %%% "specs2-scalacheck" % "4.8.1" % Test
+  ),
+  scalaJSUseMainModuleInitializer := true,
+  mainClass := Some("ru.primetalk.funtik.environment.Main")
+).dependsOn(environment, funtik)
+
 lazy val root = (project in file(".")).
-  aggregate(environment, funtik).
+  aggregate(environment, funtik, funtikScaffolding).
   settings(
     aggregate in update := false,
     publishArtifact := false
