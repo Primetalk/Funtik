@@ -11,7 +11,18 @@ object ViewWorldMap extends EnvironmentModel {
     def render(display: Display[T], ctx: dom.CanvasRenderingContext2D): Unit = {
 //      ctx.scale(ctx.canvas.width * 1.0/t.size._1, ctx.canvas.height * 1.0/t.size._2)
 //      ctx.offset(display.offset._1, display.offset._2)
-      ctx.setTransform(ctx.canvas.width * 1.0/(display.size._1 + 1), 0, 0, ctx.canvas.height * 1.0/(display.size._2 + 1), -display.offset._1, -display.offset._2)
+      object transformationMatrix {
+        val (a, b) = (ctx.canvas.width * 1.0/(display.size._1 + 1), 0)
+        val (c, d) = (0, ctx.canvas.height * 1.0/(display.size._2 + 1))
+      }
+      object offset {
+        val (dx, dy) = (-display.offset._1, -display.offset._2)
+      }
+      val m = transformationMatrix
+      ctx.setTransform(
+        m.a, m.b,
+        m.c, m.d,
+        offset.dx, offset.dy)
       for {
         p <- display.points
       } {
