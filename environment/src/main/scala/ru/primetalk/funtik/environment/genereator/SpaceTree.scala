@@ -1,15 +1,7 @@
 package ru.primetalk.funtik.environment.genereator
 
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
 
-sealed trait SpaceTree
+sealed trait Tree[T]
 
-case class SpaceTreeNode(
-    left: SpaceTree,
-    right: SpaceTree,
-    door: Door //TODO remove door from this class
-) extends SpaceTree
-
-case class RoomNode(rect: Rectangle) extends SpaceTree
-
-case class Door(x: Int, y: Int)
+case class Node[T](left: Tree[T], right: Tree[T]) extends Tree[T]
+case class Leaf[T](value: T) extends Tree[T]

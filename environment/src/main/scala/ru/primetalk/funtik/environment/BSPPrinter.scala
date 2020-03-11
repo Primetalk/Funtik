@@ -1,7 +1,7 @@
 package ru.primetalk.funtik.environment
 
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
-import ru.primetalk.funtik.environment.genereator.{BSPTree, RoomNode, SpaceTree, SpaceTreeNode}
+import ru.primetalk.funtik.environment.genereator._
 
 
 object BSPPrinter extends App{
@@ -27,15 +27,13 @@ object BSPPrinter extends App{
       }
     }
 
-    def fillArray(tree: SpaceTree): Unit = {
+    def fillArray(tree: Tree[Rectangle]): Unit = {
       tree match {
-        case s: SpaceTreeNode =>
-          fillArray(s.left)
-          fillArray(s.right)
-          array(s.door.y)(s.door.x) = "0 "
-        case r : RoomNode =>
-          writeRect(r.rect, "  ")
-
+        case Node(left, right) =>
+          fillArray(left)
+          fillArray(right)
+        case Leaf(rectangle) =>
+          writeRect(rectangle, "  ")
       }
     }
 
