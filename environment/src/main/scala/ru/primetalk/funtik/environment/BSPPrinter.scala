@@ -1,6 +1,6 @@
 package ru.primetalk.funtik.environment
 
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator._
 
 
@@ -20,8 +20,8 @@ object BSPPrinter extends App{
 
     def writeRect(rect: Rectangle, symbol: String): Unit = {
       for {
-        x <- (rect.topLeft._1 + 1) until rect.bottomRight._1 //_1  + 1 ... ._2 --looks terrible
-        y <- (rect.topLeft._2 + 1) until rect.bottomRight._2
+        x <- (rect.topLeft.x + 1) until rect.bottomRight.x
+        y <- (rect.topLeft.y + 1) until rect.bottomRight.y
       }{
         array(y)(x) = symbol
       }
@@ -48,5 +48,4 @@ object BSPPrinter extends App{
     val areaSize = 50 + i % 50
     drawRandomRoom(areaSize, roomMinSize)
   }
-
 }
