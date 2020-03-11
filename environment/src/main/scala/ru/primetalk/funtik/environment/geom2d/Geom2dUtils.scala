@@ -118,14 +118,9 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       line(bottomLeft, topLeft)
     ).flatten
 
-    def start(axis: Axis2d): Int = axis match {
-      case Horizontal => topLeft.x
-      case Vertical => topLeft.y
-    }
-
     def sideSize(axis: Axis2d): Int = axis match {
-      case Horizontal => height
-      case Vertical => width
+      case Horizontal => width
+      case Vertical => height
     }
 
     def getLongestAxis: Option[Axis2d] = {

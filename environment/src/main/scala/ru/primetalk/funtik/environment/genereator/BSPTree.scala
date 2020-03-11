@@ -13,14 +13,19 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
   def generate(boundRect: Rectangle): SpaceTree = {
     def randomAxis = if(random.nextBoolean) Horizontal else Vertical
     val splitAxis = boundRect.getLongestAxis.map(transpose).getOrElse(randomAxis)
-    val sideSize = boundRect.sideSize(splitAxis)
-    val restSideSize = sideSize - minSideSize
-    if (restSideSize > minSideSize) {
-      val splitSize = random.between(minSideSize, restSideSize)
+    val oppositeSideSize = calcOppositeSize(boundRect, splitAxis)
+    if (oppositeSideSize > minSideSize) {
+      val splitSize = random.between(minSideSize, oppositeSideSize)
       split(boundRect, splitAxis, splitSize)
     } else {
       RoomNode(boundRect)
     }
+  }
+
+  def calcOppositeSize(boundRect: Rectangle, splitAxis: Axis2d): Int = {
+    val oppositeSide = transpose(splitAxis)
+    val sideSize = boundRect.sideSize(oppositeSide)
+    sideSize - minSideSize
   }
 
   def split(sourceRect: Rectangle, axis: Axis2d, splitSize: Int): SpaceTreeNode = {
