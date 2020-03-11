@@ -1,6 +1,6 @@
 package ru.primetalk.funtik.environment.genereator
 
-import ru.primetalk.funtik.environment.Geom2dUtils.Rectangle
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
 
 sealed trait SpaceTree
 

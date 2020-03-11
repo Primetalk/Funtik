@@ -1,7 +1,9 @@
 package ru.primetalk.funtik.environment.genereator
 
-import ru.primetalk.funtik.environment.Geom2dUtils._
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator.utils.{ManagedRandom, ScalaRandom}
+import ru.primetalk.funtik.environment.geom2d.Axis2d
+import Axis2d._
 
 /**
   * @see https://en.wikipedia.org/wiki/Binary_space_partitioning
@@ -21,11 +23,11 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
     }
   }
 
-  def split(sourceRect: Rectangle, axis: Axis, splitSize: Int): SpaceTreeNode = {
+  def split(sourceRect: Rectangle, axis: Axis2d, splitSize: Int): SpaceTreeNode = {
     val (first, second) = sourceRect.split(axis, splitSize)
     val door = axis match {
-      case Horizontal => Door(second.startX + 1, second.startY)
-      case Vertical => Door(second.startX, second.startY + 1)
+      case Horizontal => Door(second.topLeft.x + 1, second.topLeft.y)
+      case Vertical => Door(second.topLeft.x, second.topLeft.y + 1)
     }
     SpaceTreeNode(generate(first), generate(second), door)
   }

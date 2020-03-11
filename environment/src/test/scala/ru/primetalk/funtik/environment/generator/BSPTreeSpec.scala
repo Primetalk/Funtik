@@ -1,17 +1,22 @@
 package ru.primetalk.funtik.environment.generator
 
-import org.scalatest.{FlatSpec, Matchers}
-import ru.primetalk.funtik.environment.Geom2dUtils.Rectangle
-import ru.primetalk.funtik.environment.genereator.{BSPTree, SpaceTreeNode}
+import org.specs2.Specification
+import org.specs2.matcher.MatchResult
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
+import ru.primetalk.funtik.environment.genereator.{BSPTree, SpaceTree, SpaceTreeNode}
 
-class BSPTreeSpec extends FlatSpec with Matchers{
+class BSPTreeSpec extends Specification { def is = s2"""
 
+  BSPTree should
+    generate some rooms    $generate
+
+  """
   def bspTree = new BSPTree
 
-  it should "should complete generate" in {
+  def generate: MatchResult[SpaceTree] = {
     val rect = Rectangle(0 -> 0, 100 -> 100)
     val result = bspTree.generate(rect)
-    result shouldBe a [SpaceTreeNode]
+    result must haveClass[SpaceTreeNode]
   }
 
 }
