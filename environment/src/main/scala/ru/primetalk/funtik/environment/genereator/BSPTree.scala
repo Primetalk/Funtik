@@ -15,7 +15,7 @@ class BSPTree(minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
   private val minSplittableSize = minSideSize * 2
 
   def generate(boundRect: Rectangle): RandomState[Tree[Rectangle]] = {
-    val splitAxis = boundRect.getLongestAxis.map(transposeState).getOrElse(Random.randomAxisState)
+    val splitAxis = boundRect.getLongestAxis.map(transposeState).getOrElse(Random.axisState)
     for {
       axis <- splitAxis
       result <- trySplit(boundRect, axis)
@@ -41,7 +41,7 @@ class BSPTree(minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
 
   def splitRect(oppositeSize: Int, boundRect: Rectangle, splitAxis: Axis2d): RandomState[Tree[Rectangle]] = {
     for{
-      splitSize <- Random.randomBetween(minSideSize, oppositeSize - minSideSize)
+      splitSize <- Random.between(minSideSize, oppositeSize - minSideSize)
       (firstRect, secondRect) = boundRect.split(splitAxis, splitSize)
       leftTree <- generate(firstRect)
       rightTree <- generate(secondRect)
