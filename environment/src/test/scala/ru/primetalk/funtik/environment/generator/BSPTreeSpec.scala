@@ -18,7 +18,7 @@ class BSPTreeSpec extends Specification { def is = s2"""
   def generate: MatchResult[Tree[Geom2dUtils.Rectangle]] = {
     val rect = Rectangle(0 -> 0, 100 -> 100)
     val stream = Random.stream(10)
-    val (result, _) = bspTree.generate(rect, stream)
+    val result = bspTree.generate(rect).runA(stream).value
     result must haveClass[Node[Rectangle]]
   }
 

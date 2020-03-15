@@ -23,11 +23,13 @@ lazy val environment =
   name := "environment"
 ).jsSettings(
     libraryDependencies ++= Seq(
+      "org.typelevel" %%% "cats-core" % "2.1.1",
       "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
     )
   ).jvmSettings(
     libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % "2.1.1",
       "org.specs2" %% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.8.3" % Test
     )

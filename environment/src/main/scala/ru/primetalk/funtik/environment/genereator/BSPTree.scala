@@ -4,7 +4,8 @@ import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Axis2d
 import Axis2d._
-
+import cats.data.State
+import ru.primetalk.funtik.environment.genereator.utils.Random.RandomState
 
 /**
   * @see https://en.wikipedia.org/wiki/Binary_space_partitioning
@@ -13,20 +14,22 @@ class BSPTree(minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
 
   private val minSplittableSize = minSideSize * 2
 
-  def generate(boundRect: Rectangle, randoms: LazyList[Int]): (Tree[Rectangle], LazyList[Int]) = {
-    val (splitAxis, nextRandoms) = boundRect.getLongestAxis match {
-      case Some(axis) => transpose(axis) -> randoms
-      case None => Random.randomAxis(randoms.head) -> randoms.tail
-    }
+  def generate(boundRect: Rectangle): RandomState[Tree[Rectangle]] = {
+    val splitAxis = boundRect.getLongestAxis.map(transposeState).getOrElse(Random.randomAxisState)
+    for {
+      axis <- splitAxis
+      result <- trySplit(boundRect, axis)
+    } yield result
+  }
+
+  def transposeState(axis: Axis2d): RandomState[Axis2d] = State.pure(transpose(axis))
+
+  def trySplit(boundRect: Rectangle, splitAxis: Axis2d): RandomState[Tree[Rectangle]] = {
     val oppositeSize = calcOppositeSize(boundRect, splitAxis)
     if (oppositeSize > minSplittableSize) {
-      val (splitSize, rand2) = Random.randomBetween(nextRandoms)(minSideSize, oppositeSize - minSideSize)
-      val (firstRect, secondRect) = boundRect.split(splitAxis, splitSize)
-      val (leftTree, rand3) = generate(firstRect, rand2)
-      val (rightTree, rand4) = generate(secondRect, rand3)
-      (Node(leftTree, rightTree), rand4)
+      splitRect(oppositeSize, boundRect, splitAxis)
     } else {
-      (Leaf(boundRect), nextRandoms)
+      State.pure(Leaf(boundRect))
     }
   }
 
@@ -34,5 +37,16 @@ class BSPTree(minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
     val oppositeSide = transpose(splitAxis)
     val sideSize = boundRect.sideSize(oppositeSide)
     sideSize
+  }
+
+  def splitRect(oppositeSize: Int, boundRect: Rectangle, splitAxis: Axis2d): RandomState[Tree[Rectangle]] = {
+    for{
+      splitSize <- Random.randomBetween(minSideSize, oppositeSize - minSideSize)
+      (firstRect, secondRect) = boundRect.split(splitAxis, splitSize)
+      leftTree <- generate(firstRect)
+      rightTree <- generate(secondRect)
+    } yield {
+      Node(leftTree, rightTree)
+    }
   }
 }
