@@ -1,8 +1,6 @@
 package ru.primetalk.funtik.environment.genereator.utils
-import cats.data.State
-import ru.primetalk.funtik.environment.geom2d.Axis2d
-import ru.primetalk.funtik.environment.geom2d.Axis2d.{Horizontal, Vertical}
 
+import cats.data.State
 import scala.util.Random
 
 object Random {
@@ -17,18 +15,16 @@ object Random {
     randomStream0(new Random(seed))
   }
 
-  def axis(nextInt: Long): Axis2d = if(nextInt % 2 == 0) Horizontal else Vertical
-
-  def axisState: RandomState[Axis2d] = State{rands =>
-    val axis = Random.axis(rands.head)
-    rands.tail -> axis
+  def between(minInclusive: Int, maxExclusive: Int): RandomState[Int] = {
+    val difference = maxExclusive.toLong - minInclusive
+    nextLong.map(long => (Math.floorMod(long, difference) + minInclusive).toInt)
   }
 
-  def between(minInclusive: Int, maxExclusive: Int): RandomState[Int] = State{randoms =>
-    val random = Math.abs(randoms.head.toInt)
-    val difference = maxExclusive - minInclusive
-    val result = random % difference + minInclusive
-    (randoms.tail, result)
-  }
+  def nextLong: RandomState[Long] = State(rands => (rands.tail, rands.head))
 
+  def nextAbsInt: RandomState[Int] = nextLong.map(l => Math.abs(l.toInt))
+
+  def nextInt: RandomState[Int] = nextLong.map(_.toInt)
+
+  def nextBoolean: RandomState[Boolean] = nextLong.map(_ % 2 == 0)
 }
