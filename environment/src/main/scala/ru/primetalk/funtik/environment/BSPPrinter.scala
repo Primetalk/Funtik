@@ -2,6 +2,7 @@ package ru.primetalk.funtik.environment
 
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator._
+import ru.primetalk.funtik.environment.genereator.utils.Random
 
 
 object BSPPrinter extends App{
@@ -9,7 +10,8 @@ object BSPPrinter extends App{
   private def drawRandomRoom(size: Int = 120, minSideSize: Int = 6): Unit = {
     val rect = Rectangle(0 -> 0, size -> size)
 
-    val partitionedSpace = new BSPTree(minSideSize = minSideSize).generate(rect)
+    val randomStream = Random.stream(System.currentTimeMillis())
+    val (partitionedSpace, _) = new BSPTree(minSideSize = minSideSize).generate(rect, randomStream)
 
 
     val array: Array[Array[String]] = Array.ofDim[String](rect.width, rect.height)

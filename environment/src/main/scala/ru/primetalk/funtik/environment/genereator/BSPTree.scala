@@ -1,27 +1,32 @@
 package ru.primetalk.funtik.environment.genereator
 
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-import ru.primetalk.funtik.environment.genereator.utils.{ManagedRandom, ScalaRandom}
+import ru.primetalk.funtik.environment.genereator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Axis2d
 import Axis2d._
+
 
 /**
   * @see https://en.wikipedia.org/wiki/Binary_space_partitioning
   */
-class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
+class BSPTree(minSideSize: Int = 4, sidesMaxRatio: Double = 1.25f) {
 
   private val minSplittableSize = minSideSize * 2
 
-  def generate(boundRect: Rectangle): Tree[Rectangle] = {
-    def randomAxis = if(random.nextBoolean) Horizontal else Vertical
-    val splitAxis = boundRect.getLongestAxis.map(transpose).getOrElse(randomAxis)
+  def generate(boundRect: Rectangle, randoms: LazyList[Int]): (Tree[Rectangle], LazyList[Int]) = {
+    val (splitAxis, nextRandoms) = boundRect.getLongestAxis match {
+      case Some(axis) => transpose(axis) -> randoms
+      case None => Random.randomAxis(randoms.head) -> randoms.tail
+    }
     val oppositeSize = calcOppositeSize(boundRect, splitAxis)
     if (oppositeSize > minSplittableSize) {
-      val splitSize = random.between(minSideSize, oppositeSize - minSideSize)
-      val (first, second) = boundRect.split(splitAxis, splitSize)
-      Node(generate(first), generate(second))
+      val (splitSize, rand2) = Random.randomBetween(nextRandoms)(minSideSize, oppositeSize - minSideSize)
+      val (firstRect, secondRect) = boundRect.split(splitAxis, splitSize)
+      val (leftTree, rand3) = generate(firstRect, rand2)
+      val (rightTree, rand4) = generate(secondRect, rand3)
+      (Node(leftTree, rightTree), rand4)
     } else {
-      Leaf(boundRect)
+      (Leaf(boundRect), nextRandoms)
     }
   }
 
@@ -30,6 +35,4 @@ class BSPTree(random: ManagedRandom = ScalaRandom, minSideSize: Int = 4, sidesMa
     val sideSize = boundRect.sideSize(oppositeSide)
     sideSize
   }
-
 }
-
