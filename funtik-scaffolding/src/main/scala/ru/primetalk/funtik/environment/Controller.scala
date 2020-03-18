@@ -26,7 +26,7 @@ class Controller
   }
 
   private def toPoints(tree: Tree[Rectangle]): List[Position] = tree match {
-    case Node(l, r) => toPoints(l) ++ toPoints(r)
+    case Node(l, r) => toPoints(l) reverse_::: toPoints(r)
     case Leaf(rect) => rect.edges
   }
 

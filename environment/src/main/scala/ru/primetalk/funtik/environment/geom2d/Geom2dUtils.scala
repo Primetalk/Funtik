@@ -133,7 +133,6 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       }
     }
 
-    //TODO: split onto N rectangles
     def split(axis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
 
       val firstSize = axis match {

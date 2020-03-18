@@ -8,11 +8,9 @@ object Random {
   type RandomState[T] = State[LazyList[Long], T]
 
   def stream(seed: Long): LazyList[Long] = {
-    def randomStream0(random: Random): LazyList[Long] = {
-      val i = random.nextLong()
-      i #:: randomStream0(random)
-    }
-    randomStream0(new Random(seed))
+    val random = new Random(seed)
+    def randomStream0 : LazyList[Long] = random.nextLong() #:: randomStream0
+    randomStream0
   }
 
   def between(minInclusive: Int, maxExclusive: Int): RandomState[Int] = {
