@@ -1,7 +1,6 @@
 package ru.primetalk.funtik.environment.genereator.utils
 
 import cats.data.State
-import scala.util.Random
 
 object Random {
 
@@ -10,7 +9,7 @@ object Random {
   type RandomState[T] = State[RandomStateValue, T]
 
   def stream(seed: Long): LazyList[Long] = {
-    val random = new Random(seed)
+    val random = new scala.util.Random(seed)
     def randomStream0 : LazyList[Long] = random.nextLong() #:: randomStream0
     randomStream0
   }
