@@ -1,4 +1,5 @@
 package ru.primetalk.funtik.environment.geom2d
+import Axis2d._
 
 
 trait Geom2dUtils[V] extends Vector2dSyntax[V] {
@@ -116,6 +117,47 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       line(bottomRight, bottomLeft),
       line(bottomLeft, topLeft)
     ).flatten
+
+    def sideSize(axis: Axis2d): Int = axis match {
+      case Horizontal => width
+      case Vertical => height
+    }
+
+    def getLongestAxis: Option[Axis2d] = {
+      if (height > width) {
+        Some(Vertical)
+      } else if (width > height) {
+        Some(Horizontal)
+      } else {
+        None
+      }
+    }
+
+    def split(axis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
+
+      val firstSize = axis match {
+        case Horizontal => vector2d(width, firstAxisSize)
+        case Vertical => vector2d(firstAxisSize, height)
+      }
+      val first = Rectangle(topLeft, firstSize)
+
+      val secondStart = axis match {
+        case Horizontal =>
+          vector2d(topLeft.x, topLeft.y + firstAxisSize - 1)
+        case Vertical =>
+          vector2d(topLeft.x + firstAxisSize - 1, topLeft.y)
+      }
+
+      val secondSize = axis match {
+        case Horizontal =>
+          vector2d(width, height - firstAxisSize + 1)
+        case Vertical =>
+          vector2d(width - firstAxisSize + 1, height)
+      }
+      val second = Rectangle(secondStart, secondSize)
+
+      (first, second)
+    }
   }
 
   // Here is the group of rotations by 90 degrees:
@@ -124,7 +166,7 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
   val rotateId: Matrix2d    = Matrix2d( 1, 0, 0, 1)
   val rotate180: Matrix2d   = Matrix2d(-1, 0, 0,-1)
 
-  val rotations = List(rotateId, rotateRight, rotate180, rotateLeft)
+  val rotations: List[Matrix2d] = List(rotateId, rotateRight, rotate180, rotateLeft)
 
   implicit class Matrix2dOps(rot: Matrix2d) {
     def apply(p: Vector): Vector = (
