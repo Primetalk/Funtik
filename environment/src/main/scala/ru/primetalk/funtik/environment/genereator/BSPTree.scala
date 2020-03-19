@@ -14,7 +14,7 @@ import ru.primetalk.funtik.environment.genereator.utils.Random.RandomState
 object BSPTree {
   def apply(
     minSideSize: Int = 4,
-    leafProbability: Double = 0.5
+    leafProbability: Double = 0.1
   )(
     boundRect: Rectangle
   ): RandomState[Tree[Rectangle]] = {

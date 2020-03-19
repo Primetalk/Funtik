@@ -164,6 +164,7 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
     }
   }
 
+  def square(size: Int): Rectangle = Rectangle(vector2d(0, 0), vector2d(size, size))
   // Here is the group of rotations by 90 degrees:
   val rotateRight: Matrix2d = Matrix2d( 0, 1,-1, 0)
   val rotateLeft: Matrix2d  = Matrix2d( 0,-1, 1, 0)
