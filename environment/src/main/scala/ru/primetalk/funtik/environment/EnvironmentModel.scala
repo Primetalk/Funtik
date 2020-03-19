@@ -1,5 +1,6 @@
 package ru.primetalk.funtik.environment
 
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 // Environment should be able to represent the situation for "bring me the red ball from my room"-task.
 // There should be rooms connected via other rooms/corridors.
 trait EnvironmentModel {
@@ -13,7 +14,8 @@ trait EnvironmentModel {
   val env1: Environment = Environment(List(myRoom -> room2), Map(myRoom -> List(redBall)))
 
   // aka tile
-  case class Point2D(x: Int, y: Int)
+//  case class Point2D(x: Int, y: Int)
+  type Point2D = Vector
   type PlaceMap = Map[Point2D, Place]
 
   case class PassByStatistics(lastPassed: List[Boolean]) {
@@ -36,13 +38,14 @@ trait EnvironmentModel {
 //  case object UnidentifiedEnvironmentObject extends Content
 //  case object MovableObject extends Material
 
-  case class WorldState(position: Point2D, rotation: Double, pointMap: PointMap,
-                        placeMap: PlaceMap)
+  case class RobotEnvState(position: Point2D, speed: Double, rotation: Double)
+
+  case class WorldState(robotEnvState: RobotEnvState, worldPointMap: WorldPointMap)
 
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)
   // initially robot is at the dock station and has no map
-  val initialState: RobotState = RobotState(Point2D(0,0), 0.0, Map(), Map())
+  val initialState: RobotState = RobotState(vector2d(0,0), 0.0, Map(), Map())
   // 1. Generate full map
   // 2. Walk robot around
   // 3. Render grey levels
