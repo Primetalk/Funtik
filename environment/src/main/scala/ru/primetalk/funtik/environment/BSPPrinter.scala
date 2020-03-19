@@ -11,7 +11,7 @@ object BSPPrinter extends App{
     val rect = Rectangle(0 -> 0, size -> size)
 
     val rands = Random.stream(System.currentTimeMillis())
-    val partitionedSpace = new BSPTree(minSideSize = minSideSize).generate(rect).runA(rands).value
+    val partitionedSpace = BSPTree(minSideSize = minSideSize)(rect).runA(rands).value
 
 
     val array: Array[Array[String]] = Array.ofDim[String](rect.width, rect.height)
