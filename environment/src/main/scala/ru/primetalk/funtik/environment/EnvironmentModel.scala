@@ -54,10 +54,10 @@ trait EnvironmentModel {
   type Vector3d = (Double, Double, Double)
   sealed trait RobotSensorData
   /** There is an external timer that will trigger at certain intervals and report current time */
-  case class TimePassed(sinceStartMs: Int) extends RobotSensorData
+  case class TimePassed(sinceStartMs: Long) extends RobotSensorData
   /** This is an information that while moving forward we have hit an obstable.
    * Eventually we may have some details like robot side that was hit. */
-  case class HitObstacle() extends RobotSensorData
+  case class HitObstacle(sinceStartMs: Long) extends RobotSensorData
   /** The vectors are noisy and require filtering.
     */
   case class GyroscopeInfo(rotation: Vector3d, acceleration: Vector3d, magneticField: Vector3d) extends RobotSensorData
