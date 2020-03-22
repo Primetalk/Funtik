@@ -8,6 +8,8 @@ trait Vector2d[V] {
 }
 
 trait Vector2dSyntax[Vector] {
+  type Vector2dDouble = (Double, Double)
+
   implicit class Vector2dOps(vector: Vector)(implicit vector2d: Vector2d[Vector]){
     def x: Int = vector2d.getAxisValue(vector, Axis2d.Abscissa)
     def y: Int = vector2d.getAxisValue(vector, Axis2d.Ordinate)
@@ -33,20 +35,47 @@ trait Vector2dSyntax[Vector] {
     def manhattanSize: Int = math.abs(vector.x) + math.abs(vector.y)
 
     def r: Double =
-      math.sqrt(vector.x * vector.x + vector.y * vector.y)
+      math.sqrt(x * x + y * y)
 
     /** Theta is an angle from X axis towards the given vector.
      * NB! The display has Y axis oriented down. So, in order to get normal
      * theta we inverse Y.*/
     def theta: Double = {
-      math.atan2(-vector.y, vector.x)
+      math.atan2(-y, x)
     }
+
+    def toDouble: Vector2dDouble = (x, y)
+
   }
 
   implicit class PairOps(p: (Int, Int))(implicit vector2d: Vector2d[Vector]){
     def toVector: Vector = vector2d(p)
   }
 
+  implicit class Vector2dDoubleOps(vector: Vector2dDouble){
+    def x: Double = vector._1
+    def y: Double = vector._2
+    def r: Double = math.sqrt(x * x + y * y)
+    def normalized: Vector2dDouble = {
+      val rr = r
+      (x / rr, y / rr)
+    }
+
+    def +(other: Vector2dDouble): Vector2dDouble =
+      (
+        vector._1 + other._1,
+        vector._2 + other._2
+      )
+    def -(other: Vector2dDouble): Vector2dDouble =
+      (
+        vector._1 - other._1,
+        vector._2 - other._2
+      )
+
+    def *(k: Double): Vector2dDouble = (x * k, y * k)
+
+    def /(k: Double): Vector2dDouble = (x / k, y / k)
+  }
 }
 
 object Vector2dIntPair extends Vector2d[(Int, Int)] {
