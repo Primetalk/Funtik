@@ -50,4 +50,24 @@ trait EnvironmentModel {
   // 2. Walk robot around
   // 3. Render grey levels
   // 4. Scaffolding/dashboard - render.
+
+  type Vector3d = (Double, Double, Double)
+  sealed trait RobotSensorData
+  /** There is an external timer that will trigger at certain intervals and report current time */
+  case class TimePassed(sinceStartMs: Int) extends RobotSensorData
+  /** This is an information that while moving forward we have hit an obstable.
+   * Eventually we may have some details like robot side that was hit. */
+  case class HitObstacle() extends RobotSensorData
+  /** The vectors are noisy and require filtering.
+    */
+  case class GyroscopeInfo(rotation: Vector3d, acceleration: Vector3d, magneticField: Vector3d) extends RobotSensorData
+
+  sealed trait RobotCommand
+  /**
+   * Set speed of left and right motors. Range of speed is [0.0, 1.0].
+   * There is some lowest speed like 0.5. If the speed is set below, motor doesn't start.
+   */
+  case class SetSpeed(left: Double, right: Double) extends RobotCommand
+  /** Takes an object in front of the robot. */
+//  case class Take() extends RobotCommand
 }
