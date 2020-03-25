@@ -32,7 +32,7 @@ object BSPTree {
 
       def split(splitPosition: Int): RandomState[Tree[Rectangle]] = {
         val splitAxis = transpose(axis)
-        val rects     = boundRect.splitL(splitAxis, splitPosition)
+        val rects     = boundRect.splitAsList(splitAxis, splitPosition)
         val rectTrees = rects.map(apply(minSideSize, leafProbability))
         val rRects = rectTrees.foldM(List[Tree[Rectangle]]()) {
           case (lst, rTree) =>
