@@ -133,6 +133,10 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       }
     }
 
+    def splitL(axis: Axis2d, firstAxisSize: Int): List[Rectangle] = {
+      val (a, b) = split(axis, firstAxisSize)
+      List(a, b)
+    }
     def split(axis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
 
       val firstSize = axis match {
@@ -160,6 +164,7 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
     }
   }
 
+  def square(size: Int): Rectangle = Rectangle(vector2d(0, 0), vector2d(size, size))
   // Here is the group of rotations by 90 degrees:
   val rotateRight: Matrix2d = Matrix2d( 0, 1,-1, 0)
   val rotateLeft: Matrix2d  = Matrix2d( 0,-1, 1, 0)

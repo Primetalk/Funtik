@@ -6,7 +6,7 @@ trait View[T] {
   def render(t: T, ctx: dom.CanvasRenderingContext2D): Unit
 }
 
-object ViewWorldMap extends EnvironmentModel {
+trait ViewWorldMap extends EnvironmentModel {
   class ViewWorldMapImpl[T](colorFun: T => Color) extends View[Display[T]] {
     def render(display: Display[T], ctx: dom.CanvasRenderingContext2D): Unit = {
       val scaleX = ctx.canvas.width * 1.0/(display.size._1 + 1)
@@ -16,7 +16,7 @@ object ViewWorldMap extends EnvironmentModel {
         val (c, d) = (0, scaleY)
       }
       object offset {
-        val (dx, dy) = (-display.offset._1, -display.offset._2)
+        val (dx, dy) = (-display.offset._1 * scaleX, - display.offset._2 * scaleY)
       }
       val m = scaleXYMatrix
       // `setTransform` is expected to be equivalent to

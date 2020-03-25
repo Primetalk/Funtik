@@ -13,19 +13,12 @@ class BSPTreeSpec extends Specification { def is = s2"""
     generate some rooms    $generate
 
   """
-  def bspTree = new BSPTree
 
   def generate: MatchResult[Tree[Geom2dUtils.Rectangle]] = {
-    val rect = createSquare(100)
-    val stream = Random.stream(10)
-    val result = bspTree.generate(rect).runA(stream).value
+    val rect = Geom2dUtils.square(100)
+    val stream = Random.stream(13)
+    val result = BSPTree(leafProbability = 0.01)(rect).runA(stream).value
     result must haveClass[Node[Rectangle]]
-  }
-
-  private def createSquare(sideSize: Int) = {
-    val topLeft = (0,0)
-    val rectSize = (sideSize, sideSize)
-    Rectangle(topLeft, rectSize)
   }
 
 }

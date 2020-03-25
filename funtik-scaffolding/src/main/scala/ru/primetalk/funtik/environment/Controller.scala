@@ -15,12 +15,12 @@ class Controller
   val gameView: View[Display[Boolean]]
 ) {
   private val rnd = new ScalaRandom()
-  private var currentGameState: Display[Boolean] = generateDisplay(rnd.nextInt())
+  private var currentGameState: Display[Boolean] = generateDisplay(System.currentTimeMillis())//rnd.nextInt())
 
-  def generateDisplay(n: Int): Display[Boolean] = {
-    val rect = Rectangle(0 -> 0, 79 -> 59)
-    val randoms = Random.stream(System.currentTimeMillis())
-    val roomTree = new BSPTree(10).generate(rect).runA(randoms).value
+  def generateDisplay(n: Long): Display[Boolean] = {
+    val rect = Rectangle((-40, -30), (79, 59))
+    val randoms = Random.stream(n)
+    val roomTree = BSPTree(leafProbability = 0.1)(rect).runA(randoms).value
     val points = toPoints(roomTree)
     Display.showPoints(points, true, false)
   }
@@ -29,7 +29,6 @@ class Controller
     case Node(l, r) => toPoints(l) reverse_::: toPoints(r)
     case Leaf(rect) => rect.edges
   }
-
 
   def redraw(): Unit = {
     gameView.render(currentGameState, ctx)
