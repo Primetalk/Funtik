@@ -5,22 +5,27 @@ import ru.primetalk.funtik.environment.genereator.{BSPTree, Leaf, Tree, Node}
 import ru.primetalk.funtik.environment.genereator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 
-import scala.util.{Random => ScalaRandom}
-
+import ViewAll._
 
 // Mutable part of the program
 class Controller
 (
   val ctx: dom.CanvasRenderingContext2D,
-  val gameView: View[Display[Boolean]]
+  seed: Long
 ) {
-  private val rnd = new ScalaRandom()
-  private var currentGameState: Display[Boolean] = generateDisplay(System.currentTimeMillis())//rnd.nextInt())
+
+  private var currentGameState: WorldState = {
+    val display = generateDisplay(seed)
+    WorldState(
+      RobotEnvState(vector2d(0,0), 0.0, 0.0),
+      display
+    )
+  }
 
   def generateDisplay(n: Long): Display[Boolean] = {
-    val rect = Rectangle((-40, -30), (79, 59))
+    val rect = Rectangle((-40, -30), (80, 60))
     val randoms = Random.stream(n)
-    val roomTree = BSPTree(leafProbability = 0.1)(rect).runA(randoms).value
+    val roomTree = BSPTree()(rect).runA(randoms).value
     val points = toPoints(roomTree)
     Display.showPoints(points, true, false)
   }
@@ -31,6 +36,6 @@ class Controller
   }
 
   def redraw(): Unit = {
-    gameView.render(currentGameState, ctx)
+    currentGameState.render(ctx)
   }
 }

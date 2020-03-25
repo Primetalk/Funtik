@@ -1,5 +1,5 @@
 package ru.primetalk.funtik.environment
 
-object ViewAll extends ViewWorldMap with EnvironmentModel {
+object ViewAll extends ViewWorldStateT with EnvironmentModel {
 
 }

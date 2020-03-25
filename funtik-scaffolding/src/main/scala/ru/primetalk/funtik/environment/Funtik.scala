@@ -2,8 +2,6 @@ package ru.primetalk.funtik.environment
 
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLCanvasElement
-import org.scalajs.dom.ext.Color
-import ru.primetalk.funtik.environment.ViewAll.ViewWorldMapImpl
 
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
@@ -18,7 +16,7 @@ object Funtik {
     val canvasElement = dom.document.getElementById(canvasId)
     val canvas = canvasElement.asInstanceOf[HTMLCanvasElement]
     val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    val controller = new Controller(ctx, new ViewWorldMapImpl[Boolean](f => if(f) Color.Green else Color.apply("#70a0a0")))
+    val controller = new Controller(ctx, System.currentTimeMillis())
     controller.redraw()
   }
 
