@@ -1,6 +1,10 @@
 package ru.primetalk.funtik.environment
 
+import cats.data.State
+import ru.primetalk.funtik.environment.genereator.utils.Random.{RandomState, RandomStateValue}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
+
+import scala.concurrent.duration.Duration
 // Environment should be able to represent the situation for "bring me the red ball from my room"-task.
 // There should be rooms connected via other rooms/corridors.
 trait EnvironmentModel {
@@ -50,4 +54,26 @@ trait EnvironmentModel {
   // 2. Walk robot around
   // 3. Render grey levels
   // 4. Scaffolding/dashboard - render.
+
+  sealed trait ModellingEvent
+
+  case class TimePassed(wallTimeMs: Long) extends ModellingEvent
+
+  trait ModelMechanics {
+
+    /** the returned Duration is the next event */
+    def start: State[RandomStateValue, (WorldState, Duration)]
+    /**
+     *  Receives an event from scaffolding (like real timer, key press, mouse click).
+     *  Despite that we try to perform deterministic modelling, we still need
+     *  to generate white noise for signals. Hence, Random state.
+     */
+    def handleEvent(state: WorldState, e: ModellingEvent): State[RandomStateValue, (WorldState, Duration)]
+
+//    /** Calculate next event. */
+//    def nextTimerEventDelayMs(state: WorldState): Option[Long] = {
+//      Some(40) // ~25 FPS
+//    }
+
+  }
 }
