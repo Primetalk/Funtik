@@ -16,8 +16,8 @@ object Funtik {
     val canvasElement = dom.document.getElementById(canvasId)
     val canvas = canvasElement.asInstanceOf[HTMLCanvasElement]
     val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    val controller = new Controller(ctx, System.currentTimeMillis())
-    controller.redraw()
+    val controller = new Controller(ctx, MechanicsImpl, System.currentTimeMillis())
+    controller.start()
   }
 
 }
