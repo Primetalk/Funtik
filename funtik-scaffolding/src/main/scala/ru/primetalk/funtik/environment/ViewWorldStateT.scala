@@ -9,18 +9,20 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
     implicit val displayView: ViewDisplay[Boolean] =
       new ViewDisplay[Boolean](if(_) Color.Green else Color.apply("#70a0a0"))
 
-    override def render(t: WorldState, ctx: CanvasRenderingContext2D): Unit = {
-      t.worldPointMap.render(ctx)
-      setTransform(t.worldPointMap, ctx)
+    override def render(worldState: WorldState, ctx: CanvasRenderingContext2D): Unit = {
+      worldState.worldPointMap.render(ctx)
+      setTransform(worldState.worldPointMap, ctx)
       ctx.strokeStyle = Color.Red.toString()
-      ctx.rotate(math.Pi - t.robotEnvState.rotation)
+      ctx.rotate(math.Pi - worldState.robotEnvState.rotation)
       ctx.lineWidth = 0.3
-      ctx.moveTo(t.robotEnvState.position.x, t.robotEnvState.position.y - 2)
-      ctx.lineTo(t.robotEnvState.position.x, t.robotEnvState.position.y + 2)
-      ctx.moveTo(t.robotEnvState.position.x - 1, t.robotEnvState.position.y + 1)
-      ctx.lineTo(t.robotEnvState.position.x, t.robotEnvState.position.y + 2)
-      ctx.moveTo(t.robotEnvState.position.x + 1, t.robotEnvState.position.y + 1)
-      ctx.lineTo(t.robotEnvState.position.x, t.robotEnvState.position.y + 2)
+      val x = worldState.robotEnvState.position.x
+      val y = worldState.robotEnvState.position.y
+      ctx.moveTo(x, y - 2)
+      ctx.lineTo(x, y + 2)
+      ctx.moveTo(x - 1, y + 1)
+      ctx.lineTo(x, y + 2)
+      ctx.moveTo(x + 1, y + 1)
+      ctx.lineTo(x, y + 2)
       ctx.fillStyle = Color.Red.toString()
       ctx.fillRect(-0.5,-0.5,1,1)
       ctx.stroke()

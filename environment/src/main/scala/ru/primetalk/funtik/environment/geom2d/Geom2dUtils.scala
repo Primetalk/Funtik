@@ -133,7 +133,7 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       }
     }
 
-    def splitL(axis: Axis2d, firstAxisSize: Int): List[Rectangle] = {
+    def splitAsList(axis: Axis2d, firstAxisSize: Int): List[Rectangle] = {
       val (a, b) = split(axis, firstAxisSize)
       List(a, b)
     }
