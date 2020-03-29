@@ -3,6 +3,8 @@ package ru.primetalk.funtik.environment
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator._
 import ru.primetalk.funtik.environment.genereator.utils.Random
+import ru.primetalk.funtik.environment.geom2d.Vector2dBasicSyntax
+import Vector2dBasicSyntax._
 
 
 object BSPPrinter extends App{

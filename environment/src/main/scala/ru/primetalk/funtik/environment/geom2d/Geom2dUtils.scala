@@ -1,16 +1,25 @@
 package ru.primetalk.funtik.environment.geom2d
+
 import Axis2d._
+import spire.algebra.{CModule, CRing, Field, VectorSpace}
+import spire.syntax.all._
 
+trait Geom2dUtils[V]  {
 
-trait Geom2dUtils[V] extends Vector2dSyntax[V] {
+  import Vector2dBasicSyntax._
   type Vector = V
   type Position = Vector
   type Direction = Vector
 
+
   implicit val vector2d: Vector2d[Vector]
 
+  implicit val vectorSpace2d: VectorSpace[Vector, Int]
+
   case class DirVector(direction: Direction, length: Int) {
-    def toVector2d: Vector = direction * length
+    import vectorSpace2d.scalar
+
+    def toVector2d: Vector = direction :* length
     def isHorizontal: Boolean = direction._2 == 0
     def isVertical: Boolean = direction._1 == 0
     /** converts line segment to points.
@@ -204,9 +213,9 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
   val Left: Direction = vector2d(-1, 0)
   val Right: Direction = vector2d(1, 0)
 
-  lazy val mainDirections: Seq[Direction] = Seq(Up, Left, Down, Right)
-  lazy val mainDirectionsInReadingOrder: Seq[Direction] = Seq(Up, Left, Right, Down)
-  lazy val directions8: Seq[Direction] = mainDirections ++ Seq(Up + Right, Up + Left, Down + Left, Down + Right)
+  lazy val mainDirections: List[Direction] = List(Up, Left, Down, Right)
+  lazy val mainDirectionsInReadingOrder: List[Direction] = List(Up, Left, Right, Down)
+  lazy val directions8: List[Direction] = mainDirections ++ List(Up + Right, Up + Left, Down + Left, Down + Right)
 
   def mul(k: Int)(d: Direction): Vector =
     vector2d(d.x * k, d.y * k)
@@ -267,5 +276,14 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
 }
 
 object Geom2dUtils extends  Geom2dUtils[(Int, Int)] {
+  import spire.std._
+  implicit val intField: Field[Int] = IntField
+  implicit val intCModule: CModule[Int, Int] = new IntIsEuclideanRing with CModule[Int, Int] {
+    override implicit def scalar: CRing[Int] = IntField
+
+    override def timesl(r: Int, v: Int): Int = r * v
+  }
   implicit lazy val vector2d: Vector2d[(Int, Int)] = Vector2dIntPair
+  implicit lazy val vectorSpace2d: VectorSpace[(Int, Int), Int] = new VectorSpaceProduct2[Int, Int]
+//  implicit lazy val vectorSpace2d: VectorSpace[(Int, Int), Int] = Vector2d.vectorSpace(vector2d)
 }

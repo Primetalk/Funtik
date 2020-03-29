@@ -1,26 +1,65 @@
 package ru.primetalk.funtik.environment.geom2d
 
+import algebra.instances.IntAlgebra
+import algebra.ring.{CommutativeRing, Ring}
+import spire.algebra.{CModule, Field, VectorSpace}
+import spire.std.IntIsEuclideanRing
+import spire.implicits._
+import spire.math._
+import spire.sp
+
 // @typeclass
 trait Vector2d[V] {
   def getAxisValue(v: V, axis: Axis2d): Int
   def apply(p: (Int, Int)): V
   def unapply(v: V): (Int, Int) = (getAxisValue(v, Axis2d.Abscissa), getAxisValue(v, Axis2d.Ordinate))
 }
+object Vector2d {
+  implicit def vectorSpace[V](implicit vector2d: Vector2d[V]): VectorSpace[V, Int] =
+    new Vector2dSpace[V]
 
-trait Vector2dSyntax[Vector] {
+}
+
+/** Implementation of Spire VectorSpace for vector2d. */
+class Vector2dSpace[Vector](implicit vector2d: Vector2d[Vector]) extends VectorSpace[Vector, Int] { //} with AdditiveAbGroup[Vector] {
+
+  import Vector2dBasicSyntax._
+  override def negate(v: Vector): Vector =
+    vector2d(-v.x, -v.y)
+
+  override def zero: Vector =
+    vector2d((0, 0))
+
+  override def plus(v1: Vector, v2: Vector): Vector =
+    vector2d(v1.x + v2.x, v1.y + v2.y)
+
+  override implicit def scalar: Field[Int] = new IntIsEuclideanRing with Field[Int] {
+    override def euclideanFunction(a: Int): BigInt = BigInt(a).abs
+    override def equot(a: Int, b: Int): Int        = spire.math.equot(a, b)
+    override def emod(a: Int, b: Int): Int         = spire.math.emod(a, b)
+    override def div(x: Int, y: Int): Int          = x / y
+  }
+
+  override def timesl(r: Int, v: Vector): Vector =
+    vector2d(r * v.x, r * v.y)
+
+}
+
+object Vector2dBasicSyntax extends Vector2dBasicSyntax
+trait Vector2dBasicSyntax {
   type Vector2dDouble = (Double, Double)
 
-  implicit class Vector2dOps(vector: Vector)(implicit vector2d: Vector2d[Vector]){
-    def x: Int = vector2d.getAxisValue(vector, Axis2d.Abscissa)
-    def y: Int = vector2d.getAxisValue(vector, Axis2d.Ordinate)
+  implicit class Vector2dOps[Vector](vector: Vector)(implicit vector2d: Vector2d[Vector]) {
+    def x: Int  = vector2d.getAxisValue(vector, Axis2d.Abscissa)
+    def y: Int  = vector2d.getAxisValue(vector, Axis2d.Ordinate)
     def _1: Int = vector2d.getAxisValue(vector, Axis2d.Abscissa)
     def _2: Int = vector2d.getAxisValue(vector, Axis2d.Ordinate)
 
-    def +(vector: Vector): Vector =
-      vector2d(x + vector.x, y + vector.y)
-    def -(vector: Vector): Vector =
-      vector2d(x - vector.x, y - vector.y)
-    def *(k: Int): Vector = vector2d(x * k, y * k)
+    //    def +(vector: Vector): Vector =
+    //      vector2d(x + vector.x, y + vector.y)
+    //    def -(vector: Vector): Vector =
+    //      vector2d(x - vector.x, y - vector.y)
+    //    def *(k: Int): Vector = vector2d(x * k, y * k)
 
     def transpose: Vector =
       vector2d(vector.y, vector.x)
@@ -48,11 +87,16 @@ trait Vector2dSyntax[Vector] {
 
   }
 
-  implicit class PairOps(p: (Int, Int))(implicit vector2d: Vector2d[Vector]){
+  implicit class PairOps[Vector](p: (Int, Int))(implicit vector2d: Vector2d[Vector]) {
     def toVector: Vector = vector2d(p)
   }
 
-  implicit class Vector2dDoubleOps(vector: Vector2dDouble){
+}
+object Vector2dSyntax extends Vector2dSyntax
+trait Vector2dSyntax {
+  type Vector2dDouble = (Double, Double)
+
+  implicit class Vector2dDoubleOps(vector: Vector2dDouble) {
     def x: Double = vector._1
     def y: Double = vector._2
     def r: Double = math.sqrt(x * x + y * y)

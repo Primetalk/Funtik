@@ -1,10 +1,14 @@
 package ru.primetalk.funtik.environment
 
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils
-import Geom2dUtils.{Direction, Position, Rectangle, Vector, Vector2dOps, directions8, mainDirections, vector2d}
+import ru.primetalk.funtik.environment.geom2d.{Geom2dUtils, Vector2dBasicSyntax}
+import Geom2dUtils.{Direction, Position, Rectangle, Vector, directions8, mainDirections, vector2d}
 import ru.primetalk.funtik.environment.graph.GraphUtils
 import ru.primetalk.funtik.environment.graph.CollectionUtils
 import ru.primetalk.funtik.environment.graph.GraphUtils.GraphAsFunction
+import Vector2dBasicSyntax._
+import ru.primetalk.funtik.environment.geom2d.Vector2dSyntax._
+import Geom2dUtils._
+import spire.syntax.all._
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -40,7 +44,7 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
       p._2 >= minY && p._2 <= maxY
 
   def adjacentPositions(p: Position): Seq[Position] =
-    mainDirections.map(_ + p).filter(isWithinRange)
+    mainDirections.map(_ + vector2d(p)).filter(isWithinRange)
 
   def positionsAround(p: Position): Seq[Position] =
     directions8.map(_ + p).filter(isWithinRange)
@@ -101,7 +105,7 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
 
   def apply(position: Position): T = {
     val p = position - offset
-    array(p._2)(p._1)
+    array(p.y)(p.x)
   }
 
   /**

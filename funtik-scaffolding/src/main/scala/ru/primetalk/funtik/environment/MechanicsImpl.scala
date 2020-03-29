@@ -8,6 +8,9 @@ import ru.primetalk.funtik.environment.genereator.{ BSPTree, Tree }
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ViewAll._
 import cats.data.State
+import ru.primetalk.funtik.environment.geom2d.Vector2dBasicSyntax._
+import spire.syntax.all._
+import ru.primetalk.funtik.environment.geom2d.Vector2dSyntax._
 
 object MechanicsImpl extends ModelMechanics {
 

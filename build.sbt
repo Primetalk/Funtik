@@ -25,6 +25,7 @@ lazy val environment =
     libraryDependencies ++= Seq(
       "org.typelevel" %%% "cats-core" % "2.1.1",
       "org.typelevel" %%% "algebra" % "2.0.0",
+      "org.typelevel" %%% "spire" % "0.17.0-M1",
       "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
     )
@@ -32,6 +33,7 @@ lazy val environment =
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "2.1.1",
       "org.typelevel" %% "algebra" % "2.0.0",
+      "org.typelevel" %% "spire" % "0.17.0-M1",
       "org.specs2" %% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.8.3" % Test
     )
