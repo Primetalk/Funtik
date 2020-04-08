@@ -9,6 +9,7 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       new ViewDisplay[Boolean](if(_) Color.Green else Color.apply("#70a0a0"))
 
     override def render(worldState: WorldState, ctx: CanvasRenderingContext2D): Unit = {
+      ctx.beginPath()
       worldState.worldPointMap.render(ctx)
       setTransform(worldState.worldPointMap, ctx)
       ctx.strokeStyle = Color.Red.toString()
@@ -23,7 +24,7 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       ctx.moveTo(x + 1, y + 1)
       ctx.lineTo(x, y + 2)
       ctx.fillStyle = Color.Red.toString()
-      ctx.fillRect(-0.5,-0.5,1,1)
+      ctx.fillRect(x - 0.5, y - 0.5, x + 1, y + 1)
       ctx.stroke()
       clearTransform(ctx)
     }

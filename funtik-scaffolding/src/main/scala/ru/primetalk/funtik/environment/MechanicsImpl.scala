@@ -29,7 +29,7 @@ object MechanicsImpl extends ModelMechanics {
     generateDisplay(rect).map { display =>
       (
         WorldState(
-          RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(0.0,0.0), Vector2d(0.0,0.0), wallTimeMs * 0.001), 0.0, 0.0)),
+          RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0,1.0), Vector2d(0.0,100.0), Milliseconds(wallTimeMs)/su.time), 0.5, 0.1)),
           display
         ),
         defaultDuration
