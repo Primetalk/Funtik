@@ -1,27 +1,24 @@
 package ru.primetalk.funtik.environment.geom2d
 
 import Axis2d._
-import spire.algebra.{CModule, CRing, Field, VectorSpace}
-import spire.syntax.all._
+import spire.implicits._
+import Vector._
+import Vector2dBasicSyntax._
 
-trait Geom2dUtils[V]  {
+trait Geom2dUtils  {
 
-  import Vector2dBasicSyntax._
-  type Vector = V
+  type Vector = Vector2d[Int]
   type Position = Vector
   type Direction = Vector
 
+  def Vector(x: Int, y: Int): Vector = Vector2d(x, y)
 
-  implicit val vector2d: Vector2d[Vector]
-
-  implicit val vectorSpace2d: VectorSpace[Vector, Int]
+  def vector2d(x: Int, y: Int): Vector = Vector2d(x, y)
 
   case class DirVector(direction: Direction, length: Int) {
-    import vectorSpace2d.scalar
-
     def toVector2d: Vector = direction :* length
-    def isHorizontal: Boolean = direction._2 == 0
-    def isVertical: Boolean = direction._1 == 0
+    def isHorizontal: Boolean = direction.y == 0
+    def isVertical: Boolean = direction.x == 0
     /** converts line segment to points.
       * NB! Does not include start position! This is convenient when drawing many segments*/
     def drawPrependFromStart(start: Position, positions: List[Position] = Nil): List[Position] = {
@@ -71,7 +68,7 @@ trait Geom2dUtils[V]  {
       if(if(dirX > 0) x > x1.round else x < x1.round)
         reversed.reverse
       else {
-        val res1 = vector2d(x, y) :: reversed
+        val res1 = Vector2d(x, y) :: reversed
         val error1 = error + deltaErr
 
         if(error1 >= deltaX + 1)
@@ -99,7 +96,7 @@ trait Geom2dUtils[V]  {
   }
 
   def rectangleByDiagonal(topLeft: Position, bottomRight: Position): Rectangle = {
-    Rectangle(topLeft, bottomRight - topLeft + vector2d(1, 1))
+    Rectangle(topLeft, bottomRight - topLeft + Vector2d(1, 1))
   }
 
   /** Origin is in top left corner. */
@@ -114,11 +111,11 @@ trait Geom2dUtils[V]  {
 
     def coordinatePoints: Seq[Position] = Seq(topLeft, bottomRight)
 
-    def bottomRight: Position = topLeft + size - vector2d(1, 1)
+    def bottomRight: Position = topLeft + size - Vector2d(1, 1)
 
-    def topRight: Position = topLeft + vector2d(width - 1, 0)
+    def topRight: Position = topLeft + Vector2d(width - 1, 0)
 
-    def bottomLeft: Position = topLeft + vector2d(0, height - 1)
+    def bottomLeft: Position = topLeft + Vector2d(0, height - 1)
 
     def edges: List[Position] = List(
       line(topLeft, topRight),
@@ -149,23 +146,23 @@ trait Geom2dUtils[V]  {
     def split(axis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
 
       val firstSize = axis match {
-        case Horizontal => vector2d(width, firstAxisSize)
-        case Vertical => vector2d(firstAxisSize, height)
+        case Horizontal => Vector2d(width, firstAxisSize)
+        case Vertical => Vector2d(firstAxisSize, height)
       }
       val first = Rectangle(topLeft, firstSize)
 
       val secondStart = axis match {
         case Horizontal =>
-          vector2d(topLeft.x, topLeft.y + firstAxisSize - 1)
+          Vector2d(topLeft.x, topLeft.y + firstAxisSize - 1)
         case Vertical =>
-          vector2d(topLeft.x + firstAxisSize - 1, topLeft.y)
+          Vector2d(topLeft.x + firstAxisSize - 1, topLeft.y)
       }
 
       val secondSize = axis match {
         case Horizontal =>
-          vector2d(width, height - firstAxisSize + 1)
+          Vector2d(width, height - firstAxisSize + 1)
         case Vertical =>
-          vector2d(width - firstAxisSize + 1, height)
+          Vector2d(width - firstAxisSize + 1, height)
       }
       val second = Rectangle(secondStart, secondSize)
 
@@ -173,7 +170,7 @@ trait Geom2dUtils[V]  {
     }
   }
 
-  def square(size: Int): Rectangle = Rectangle(vector2d(0, 0), vector2d(size, size))
+  def square(size: Int): Rectangle = Rectangle(Vector2d(0, 0), Vector2d(size, size))
   // Here is the group of rotations by 90 degrees:
   val rotateRight: Matrix2d = Matrix2d( 0, 1,-1, 0)
   val rotateLeft: Matrix2d  = Matrix2d( 0,-1, 1, 0)
@@ -201,24 +198,24 @@ trait Geom2dUtils[V]  {
     val xs = positions.map(_._1)
     val ys = positions.map(_._2)
     rectangleByDiagonal(
-      topLeft = vector2d(xs.min, ys.min),
-      bottomRight = vector2d(xs.max, ys.max)
+      topLeft = Vector2d(xs.min, ys.min),
+      bottomRight = Vector2d(xs.max, ys.max)
     )
   }
 
-  val origin: Position = vector2d(0, 0)
+  val origin: Position = Vector2d(0, 0)
 
-  val Up: Direction = vector2d(0, +1)
-  val Down: Direction = vector2d(0, -1)
-  val Left: Direction = vector2d(-1, 0)
-  val Right: Direction = vector2d(1, 0)
+  val Up: Direction = Vector2d(0, +1)
+  val Down: Direction = Vector2d(0, -1)
+  val Left: Direction = Vector2d(-1, 0)
+  val Right: Direction = Vector2d(1, 0)
 
   lazy val mainDirections: List[Direction] = List(Up, Left, Down, Right)
   lazy val mainDirectionsInReadingOrder: List[Direction] = List(Up, Left, Right, Down)
   lazy val directions8: List[Direction] = mainDirections ++ List(Up + Right, Up + Left, Down + Left, Down + Right)
 
   def mul(k: Int)(d: Direction): Vector =
-    vector2d(d.x * k, d.y * k)
+    Vector2d(d.x * k, d.y * k)
 
   def manhattanDistance(p1: Position, p2: Position): Int = {
     math.abs(p1._1 - p2._1) + math.abs(p1._2 - p2._2)
@@ -250,7 +247,7 @@ trait Geom2dUtils[V]  {
   }
 
   def manhattanCircle(p: Position, r: Int): ManhattanEllipse = {
-    ManhattanEllipse(p - vector2d(r,0), p + vector2d(r,0))
+    ManhattanEllipse(p - Vector2d(r,0), p + Vector2d(r,0))
   }
   /**
    * This method converts a one-char representation of direction to
@@ -275,15 +272,5 @@ trait Geom2dUtils[V]  {
 
 }
 
-object Geom2dUtils extends  Geom2dUtils[(Int, Int)] {
-  import spire.std._
-  implicit val intField: Field[Int] = IntField
-  implicit val intCModule: CModule[Int, Int] = new IntIsEuclideanRing with CModule[Int, Int] {
-    override implicit def scalar: CRing[Int] = IntField
-
-    override def timesl(r: Int, v: Int): Int = r * v
-  }
-  implicit lazy val vector2d: Vector2d[(Int, Int)] = Vector2dIntPair
-  implicit lazy val vectorSpace2d: VectorSpace[(Int, Int), Int] = new VectorSpaceProduct2[Int, Int]
-//  implicit lazy val vectorSpace2d: VectorSpace[(Int, Int), Int] = Vector2d.vectorSpace(vector2d)
+object Geom2dUtils extends  Geom2dUtils {
 }
