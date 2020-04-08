@@ -32,7 +32,7 @@ class Controller
       case (state, duration) =>
         state.render(ctx)
         timers.setTimeout(duration.toMillis) {
-          val timePassed = TimePassed(Date.now().toLong)
+          val timePassed = ScaffoldingTimePassed(Date.now().toLong)
           randomStream = modelMechanics.handleEvent(state, timePassed).
             map(newStateAvailable).
             runS(randomStream).
