@@ -12,10 +12,10 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       worldState.worldPointMap.render(ctx)
       setTransform(worldState.worldPointMap, ctx)
       ctx.strokeStyle = Color.Red.toString()
-      ctx.rotate(math.Pi - worldState.robotEnvState.rotation)
+      ctx.rotate(math.Pi - worldState.robotEnvState.solidBodyState.theta)
       ctx.lineWidth = 0.3
-      val x = worldState.robotEnvState.position.x
-      val y = worldState.robotEnvState.position.y
+      val x = worldState.robotEnvState.solidBodyState.materialParticle.position.x
+      val y = worldState.robotEnvState.solidBodyState.materialParticle.position.y
       ctx.moveTo(x, y - 2)
       ctx.lineTo(x, y + 2)
       ctx.moveTo(x - 1, y + 1)

@@ -19,11 +19,13 @@ class Controller
   seed: Long
 ) {
 
+  def realTimeMs: Long = Date.now().toLong
+
   def start(): Unit = {
 
     var randomStream: RandomStateValue = Random.stream(seed)
     randomStream = modelMechanics.
-      start.
+      start(realTimeMs).
       map(newStateAvailable).
       runS(randomStream).
       value
@@ -32,7 +34,7 @@ class Controller
       case (state, duration) =>
         state.render(ctx)
         timers.setTimeout(duration.toMillis) {
-          val timePassed = ScaffoldingTimePassed(Date.now().toLong)
+          val timePassed = ScaffoldingTimePassed(realTimeMs)
           randomStream = modelMechanics.handleEvent(state, timePassed).
             map(newStateAvailable).
             runS(randomStream).

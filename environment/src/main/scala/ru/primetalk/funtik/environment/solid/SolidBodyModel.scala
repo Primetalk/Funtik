@@ -1,13 +1,9 @@
 package ru.primetalk.funtik.environment.solid
 
 import ru.primetalk.funtik.environment.geom2d.Vector2d
-import spire.algebra.VectorSpace
-import squants.space.{Length, Meters}
-import squants.QuantityVector
-import squants.time.{Seconds, Time}
+import squants.space.{Length, LengthUnit, Meters}
+import squants.time.{Seconds, Time, TimeUnit}
 import spire.syntax.all._
-import spire.std.double._
-
 import ru.primetalk.funtik.environment.geom2d.Vector._
 /**
  * This object contains a simple kinematic model of a solid body that has mass=0.
@@ -18,6 +14,7 @@ object SolidBodyModel {
   /** A system of units that specify measurement units that are used as default in
    * calculations. The values are stored dimensionless. */
   case class SystemOfUnits(length: Length = Meters(1), time: Time = Seconds(1))
+  implicit val su: SystemOfUnits = SystemOfUnits()
   case class MaterialParticleState(position: Vector, speed: Vector, t: Double)(implicit su: SystemOfUnits) {
     /** Calculate new position in time = t1. */
     def integrate(t1: Double): MaterialParticleState =
@@ -30,7 +27,7 @@ object SolidBodyModel {
       integrate(t1).copy(speed = speed)
   }
   /** State of a solid body includes angle theta and the speed at which this angle is changing. */
-  case class SolidBodyState(materialParticle: MaterialParticleState, theta: Double, omega: Double)(implicit su: SystemOfUnits) {
+  case class SolidBodyState(materialParticle: MaterialParticleState, theta: Double, omega: Double) {
     /** Calculate new position in time = t1. */
     def integrate(t1: Double): SolidBodyState =
       SolidBodyState(

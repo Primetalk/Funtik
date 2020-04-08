@@ -1,9 +1,9 @@
 package ru.primetalk.funtik.environment
 
 import cats.data.State
-import ru.primetalk.funtik.environment.genereator.utils.Random.{RandomState, RandomStateValue}
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-import ru.primetalk.funtik.environment.geom2d.Vector2d
+import ru.primetalk.funtik.environment.genereator.utils.Random.RandomStateValue
+import ru.primetalk.funtik.environment.geom2d.{Vector2d, Vector3d}
+import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 
 import scala.concurrent.duration.Duration
 // Environment should be able to represent the situation for "bring me the red ball from my room"-task.
@@ -19,8 +19,7 @@ trait EnvironmentModel {
   val env1: Environment = Environment(List(myRoom -> room2), Map(myRoom -> List(redBall)))
 
   // aka tile
-//  case class Point2D(x: Int, y: Int)
-  type Point2D = Vector
+  type Point2D = Vector2d[Int]
   type PlaceMap = Map[Point2D, Place]
 
   case class PassByStatistics(lastPassed: List[Boolean]) {
@@ -43,7 +42,7 @@ trait EnvironmentModel {
 //  case object UnidentifiedEnvironmentObject extends Content
 //  case object MovableObject extends Material
 
-  case class RobotEnvState(position: Point2D, speed: Double, rotation: Double)
+  case class RobotEnvState(solidBodyState: SolidBodyState)
 
   case class WorldState(robotEnvState: RobotEnvState, worldPointMap: WorldPointMap)
 
@@ -63,7 +62,7 @@ trait EnvironmentModel {
   trait ModelMechanics {
 
     /** the returned Duration is the next event */
-    def start: State[RandomStateValue, (WorldState, Duration)]
+    def start(wallTimeMs: Long): State[RandomStateValue, (WorldState, Duration)]
     /**
      *  Receives an event from scaffolding (like real timer, key press, mouse click).
      *  Despite that we try to perform deterministic modelling, we still need
@@ -78,7 +77,7 @@ trait EnvironmentModel {
 
   }
 
-  type Vector3d = (Double, Double, Double)
+  type Vector3dDouble = Vector3d[Double]
   sealed trait RobotSensorData
   /** There is an external timer that will trigger at certain intervals and report current time */
   case class TimePassed(sinceStartMs: Long) extends RobotSensorData
@@ -87,7 +86,7 @@ trait EnvironmentModel {
   case class HitObstacle(sinceStartMs: Long) extends RobotSensorData
   /** The vectors are noisy and require filtering.
     */
-  case class GyroscopeInfo(rotation: Vector3d, acceleration: Vector3d, magneticField: Vector3d) extends RobotSensorData
+  case class GyroscopeInfo(rotation: Vector3dDouble, acceleration: Vector3dDouble, magneticField: Vector3dDouble) extends RobotSensorData
 
   sealed trait RobotCommand
   /**
