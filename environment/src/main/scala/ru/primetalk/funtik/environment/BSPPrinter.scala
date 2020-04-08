@@ -3,14 +3,13 @@ package ru.primetalk.funtik.environment
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.genereator._
 import ru.primetalk.funtik.environment.genereator.utils.Random
-import ru.primetalk.funtik.environment.geom2d.Vector2dBasicSyntax
-import Vector2dBasicSyntax._
+import ru.primetalk.funtik.environment.geom2d.Vector2d
 
 
 object BSPPrinter extends App{
 
   private def drawRandomRoom(size: Int = 120, minSideSize: Int = 6): Unit = {
-    val rect = Rectangle(0 -> 0, size -> size)
+    val rect = Rectangle(Vector2d(0, 0), Vector2d(size, size))
 
     val rands = Random.stream(System.currentTimeMillis())
     val partitionedSpace = BSPTree(minSideSize = minSideSize)(rect).runA(rands).value

@@ -1,14 +1,12 @@
 package ru.primetalk.funtik.environment
 
-import ru.primetalk.funtik.environment.geom2d.{Geom2dUtils, Vector2dBasicSyntax}
-import Geom2dUtils.{Direction, Position, Rectangle, Vector, directions8, mainDirections, vector2d}
+import ru.primetalk.funtik.environment.geom2d.{Geom2dUtils, Vector2d}
+import Geom2dUtils.{Direction, Position, Rectangle, Vector, directions8, mainDirections}
 import ru.primetalk.funtik.environment.graph.GraphUtils
 import ru.primetalk.funtik.environment.graph.CollectionUtils
 import ru.primetalk.funtik.environment.graph.GraphUtils.GraphAsFunction
-import Vector2dBasicSyntax._
-import ru.primetalk.funtik.environment.geom2d.Vector2dSyntax._
-import Geom2dUtils._
 import spire.syntax.all._
+import ru.primetalk.funtik.environment.geom2d.Vector._
 
 import scala.annotation.tailrec
 import scala.reflect.ClassTag
@@ -44,16 +42,16 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
       p._2 >= minY && p._2 <= maxY
 
   def adjacentPositions(p: Position): Seq[Position] =
-    mainDirections.map(_ + vector2d(p)).filter(isWithinRange)
+    mainDirections.map(p + _).filter(isWithinRange)
 
   def positionsAround(p: Position): Seq[Position] =
-    directions8.map(_ + p).filter(isWithinRange)
+    directions8.map(p + _).filter(isWithinRange)
 
   def points: List[Position] =
     (for{
       j <- ys
       i <- xs
-    } yield (i, j)
+    } yield Vector2d(i, j)
       ).toList
 
   def pointsFiltered(pred: T => Boolean): List[Position] =
@@ -63,22 +61,9 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
     for{
       j <- ys
       i <- xs
-    } yield apply(i, j)
+    } yield apply(Vector2d(i, j))
 
-  def valuesOnEdges: Set[T] =
-    {
-      val jValues = for {
-        j <- ys
-        v <- Seq(apply((minX, j)), apply((maxX, j)))
-      } yield v
-
-      val iValues = for {
-        i <- xs
-        v <- Seq(apply((i, minY)), apply((i, maxY)))
-      } yield v
-
-      iValues.toSet ++ jValues.toSet
-    }
+  def valuesOnEdges: Set[T] = edges.map(apply).toSet
 
   def valuesAround(p: Position): Seq[T] = {
     positionsAround(p)
@@ -93,14 +78,14 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
     if(maxX < minX || maxY < minY)
       Seq()
     else if(maxX == minX)
-      ys.map((minX, _))
+      ys.map(Vector2d(minX, _))
     else if(maxY == minY)
-      xs.map((_, minY))
+      xs.map(Vector2d(_, minY))
     else
-      xs.map((_, minY)) ++
-        xs.map((_, maxY)) ++
-        (minY + 1).until(maxY).map((minX, _)) ++
-        (minY + 1).until(maxY).map((maxX, _))
+      xs.map(Vector2d(_, minY)) ++
+        xs.map(Vector2d(_, maxY)) ++
+        (minY + 1).until(maxY).map(Vector2d(minX, _)) ++
+        (minY + 1).until(maxY).map(Vector2d(maxX, _))
   }
 
   def apply(position: Position): T = {
@@ -215,7 +200,7 @@ case class Display[T: ClassTag](offset: Vector, size: Vector)(init: Option[() =>
 
   def flipY: Display[T] = {
     val a: Array[Array[T]] = array.reverse
-    new Display[T]((offset._1, -offset._2), size)(Some(() => a))
+    new Display[T](Vector2d(offset._1, -offset._2), size)(Some(() => a))
   }
 }
 
@@ -225,9 +210,9 @@ object Display {
   }
 
   def readCharDisplay(lines: Seq[String]): Display[Char] = {
-    val size = (lines.head.length, lines.length)
+    val size = Vector2d(lines.head.length, lines.length)
     val a = lines.map(_.toCharArray).toArray
-    val d = Display[Char]((0,0), size)(Some(() => a))
+    val d = Display[Char](Vector2d(0,0), size)(Some(() => a))
     d
   }
 
