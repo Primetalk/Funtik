@@ -18,10 +18,10 @@ trait ViewWorldMap extends EnvironmentModel {
     val scaleY = ctx.canvas.height * 1.0 / display.size._2
     object scaleXYMatrix {
       val (a, b) = (scaleX, 0)
-      val (c, d) = (0, scaleY)
+      val (c, d) = (0, -scaleY) // we want Y to go up
     }
     object offset {
-      val (dx, dy) = (- (display.offset._1 - 0.5) * scaleX, - (display.offset._2 - 0.5) * scaleY)
+      val (dx, dy) = (- (display.offset._1 - 0.5) * scaleX, - (display.offset._2 - 1.5) * scaleY) // -1.5 - empirical correction. Not sure why
     }
     val m = scaleXYMatrix
     // `setTransform` is expected to be equivalent to

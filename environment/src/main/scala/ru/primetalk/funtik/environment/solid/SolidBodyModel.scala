@@ -19,12 +19,8 @@ object SolidBodyModel {
 
     /** Calculate new position in time = t1. */
     def integrate(t1: Double): MaterialParticleState = {
-      val deltaPosition = speed :* (t1 - t)
-      val position2 = position + deltaPosition
-      println(s"(${position.x}, ${position.y})+(${deltaPosition.x}, ${deltaPosition.y}) = (${position2.x}, ${position2.y})")
-//      println(s"(${position.x}, ${position.y})+(${speed.x}, ${speed.y})*${(t1 - t)} = (${position2.x}, ${position2.y})")
       MaterialParticleState(
-        position = position2,
+        position = position + (speed :* (t1 - t)),
         speed = speed,
         t = t1
       )
