@@ -13,7 +13,7 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       worldState.worldPointMap.render(ctx)
       setTransform(worldState.worldPointMap, ctx)
       ctx.strokeStyle = Color.Red.toString()
-      ctx.rotate(math.Pi - worldState.robotEnvState.solidBodyState.theta)
+      ctx.rotate(math.Pi/2 - worldState.robotEnvState.solidBodyState.theta)
       ctx.lineWidth = 0.3
       val x = worldState.robotEnvState.solidBodyState.materialParticle.position.x
       val y = worldState.robotEnvState.solidBodyState.materialParticle.position.y
@@ -24,7 +24,7 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       ctx.moveTo(x + 1, y + 1)
       ctx.lineTo(x, y + 2)
       ctx.fillStyle = Color.Red.toString()
-      ctx.fillRect(x - 0.5, y - 0.5, x + 1, y + 1)
+      ctx.fillRect(x - 0.5, y - 0.5, 1, 1)
       ctx.stroke()
       clearTransform(ctx)
     }

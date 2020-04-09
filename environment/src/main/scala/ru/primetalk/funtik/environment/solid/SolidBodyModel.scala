@@ -16,13 +16,20 @@ object SolidBodyModel {
   case class SystemOfUnits(length: Length = Meters(1), time: Time = Seconds(1))
   implicit val su: SystemOfUnits = SystemOfUnits()
   case class MaterialParticleState(position: Vector, speed: Vector, t: Double)(implicit su: SystemOfUnits) {
+
     /** Calculate new position in time = t1. */
-    def integrate(t1: Double): MaterialParticleState =
+    def integrate(t1: Double): MaterialParticleState = {
+      val deltaPosition = speed :* (t1 - t)
+      val position2 = position + deltaPosition
+      println(s"(${position.x}, ${position.y})+(${deltaPosition.x}, ${deltaPosition.y}) = (${position2.x}, ${position2.y})")
+//      println(s"(${position.x}, ${position.y})+(${speed.x}, ${speed.y})*${(t1 - t)} = (${position2.x}, ${position2.y})")
       MaterialParticleState(
-        position = position + speed :* (t1 - t),
+        position = position2,
         speed = speed,
         t = t1
       )
+    }
+
     def setSpeed(t1: Double, speed: Vector): MaterialParticleState =
       integrate(t1).copy(speed = speed)
   }

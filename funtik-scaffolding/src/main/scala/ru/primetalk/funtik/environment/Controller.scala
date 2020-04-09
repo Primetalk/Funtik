@@ -19,7 +19,11 @@ class Controller
   seed: Long
 ) {
 
-  def realTimeMs: Long = Date.now().toLong
+  def realTimeMs: Long = {
+    val res = Date.now().toLong
+//    println(s"t: $res")
+    res
+  }
 
   def start(): Unit = {
 

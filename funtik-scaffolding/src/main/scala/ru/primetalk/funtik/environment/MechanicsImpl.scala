@@ -21,7 +21,7 @@ object MechanicsImpl extends ModelMechanics {
       Display.showPoints(points, true, false)
     }
 
-  val defaultDuration: FiniteDuration = 40.milliseconds
+  val defaultDuration: FiniteDuration = 400.milliseconds
 
   /** the returned Duration is the next event */
   override def start(wallTimeMs: Long): State[RandomStateValue, (ViewAll.WorldState, Duration)] = {
@@ -29,7 +29,8 @@ object MechanicsImpl extends ModelMechanics {
     generateDisplay(rect).map { display =>
       (
         WorldState(
-          RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0,1.0), Vector2d(0.0,100.0), Milliseconds(wallTimeMs)/su.time), 0.5, 0.1)),
+          RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0,1.0), Vector2d(0.0,1.0),
+            Milliseconds(wallTimeMs)/su.time), 0.0, 0.1)),
           display
         ),
         defaultDuration
