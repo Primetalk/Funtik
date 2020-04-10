@@ -17,7 +17,7 @@ class Geom2dUtilsSpec extends Specification { def is: SpecStructure =
       |  The line (0.6,0) -- (1.6, 1) should start at (1,0)
       |$e3
       |""".stripMargin
-  private def e1 = Geom2dUtils.bresenhamLine(0.0, 0.0, 1.0, 1.0) must be equalTo List((0,0), (1,1))
+  private def e1 = Geom2dUtils.bresenhamLine(0.0, 0.0, 1.0, 1.0) must be equalTo List(Vector2d(0,0), Vector2d(1,1))
   private def e2 = Geom2dUtils.bresenhamLine(0.0, 0.0, 4.0, 20.0) must haveSize(21)
-  private def e3 = Geom2dUtils.bresenhamLine(0.6, 0.0, 1.6, 1.0).head must be equalTo  (1, 0)
+  private def e3 = Geom2dUtils.bresenhamLine(0.6, 0.0, 1.6, 1.0).head must be equalTo  Vector2d(1, 0)
 }
