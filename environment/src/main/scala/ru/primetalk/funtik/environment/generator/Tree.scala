@@ -13,4 +13,12 @@ object Tree {
     case Nil => throw new IllegalArgumentException("Cannot construct tree from an empty list of nodes")
     case a :: tail => constructNode(a, constructNode(tail : _ *))
   }
+
+  def eliminate[T, A](leaf: T => A)(node: (A, A) => A): Tree[T] => A = {
+    case Leaf(v) => leaf(v)
+    case Node(left, right) =>
+      val l = eliminate(leaf)(node)(left)
+      val r = eliminate(leaf)(node)(right)
+      node(l, r)
+  }
 }

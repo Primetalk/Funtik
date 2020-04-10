@@ -1,41 +1,44 @@
 package ru.primetalk.funtik.environment
 
 import org.scalajs.dom
-import ru.primetalk.funtik.environment.generator.{BSPTree, Leaf, Tree, Node}
+import ru.primetalk.funtik.environment.generator.{BSPTree, Leaf, Node, Tree}
 import ru.primetalk.funtik.environment.generator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-
 import ViewAll._
+import cats.data.State
+import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
+
+import scala.concurrent.duration.Duration
+import scala.scalajs.js.{Date, timers}
 
 // Mutable part of the program
 class Controller
 (
   val ctx: dom.CanvasRenderingContext2D,
+  modelMechanics: ModelMechanics,
   seed: Long
 ) {
 
-  private var currentGameState: WorldState = {
-    val display = generateDisplay(seed)
-    WorldState(
-      RobotEnvState(vector2d(0,0), 0.0, 0.0),
-      display
-    )
-  }
+  def start(): Unit = {
 
-  def generateDisplay(n: Long): Display[Boolean] = {
-    val rect = Rectangle((-40, -30), (80, 60))
-    val randoms = Random.stream(n)
-    val roomTree = BSPTree()(rect).runA(randoms).value
-    val points = toPoints(roomTree)
-    Display.showPoints(points, true, false)
-  }
+    var randomStream: RandomStateValue = Random.stream(seed)
+    randomStream = modelMechanics.
+      start.
+      map(newStateAvailable).
+      runS(randomStream).
+      value
 
-  private def toPoints(tree: Tree[Rectangle]): List[Position] = tree match {
-    case Node(l, r) => toPoints(l) reverse_::: toPoints(r)
-    case Leaf(rect) => rect.edges
-  }
+    def newStateAvailable: ((WorldState, Duration)) => Unit = {
+      case (state, duration) =>
+        state.render(ctx)
+        timers.setTimeout(duration.toMillis) {
+          val timePassed = ScaffoldingTimePassed(Date.now().toLong)
+          randomStream = modelMechanics.handleEvent(state, timePassed).
+            map(newStateAvailable).
+            runS(randomStream).
+            value
+        }
+    }
 
-  def redraw(): Unit = {
-    currentGameState.render(ctx)
   }
 }
