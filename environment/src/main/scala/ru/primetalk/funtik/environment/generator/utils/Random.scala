@@ -1,6 +1,8 @@
-package ru.primetalk.funtik.environment.genereator.utils
+package ru.primetalk.funtik.environment.generator.utils
 
 import cats.data.State
+
+import cats.implicits._
 
 object Random {
 
@@ -47,4 +49,9 @@ object Random {
   def nextBooleanProb(p: Double): RandomState[Boolean] = nextDouble().map{ _ < p}
 
   def nextProb(p: Double): RandomState[Option[Unit]] = nextBooleanProb(p).map{ Option.when(_)(()) }
+
+  def listRandomToRandomList[T](list: List[RandomState[T]]): RandomState[List[T]] = list.foldM[RandomState, List[T]](List[T]()){
+    case (list, randomT) =>
+      randomT.map(t => t :: list)
+  }
 }

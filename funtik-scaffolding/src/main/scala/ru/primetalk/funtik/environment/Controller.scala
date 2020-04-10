@@ -1,8 +1,8 @@
 package ru.primetalk.funtik.environment
 
 import org.scalajs.dom
-import ru.primetalk.funtik.environment.genereator.{BSPTree, Leaf, Tree, Node}
-import ru.primetalk.funtik.environment.genereator.utils.Random
+import ru.primetalk.funtik.environment.generator.{BSPTree, Leaf, Tree, Node}
+import ru.primetalk.funtik.environment.generator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 
 import ViewAll._
