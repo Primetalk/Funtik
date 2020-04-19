@@ -3,6 +3,7 @@ package ru.primetalk.funtik.environment
 import cats.data.State
 import ru.primetalk.funtik.environment.generator.utils.Random.{RandomState, RandomStateValue}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
+import ru.primetalk.funtik.environment.geom2d.Vector2d
 
 import scala.concurrent.duration.Duration
 // Environment should be able to represent the situation for "bring me the red ball from my room"-task.
@@ -49,7 +50,7 @@ trait EnvironmentModel {
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)
   // initially robot is at the dock station and has no map
-  val initialState: RobotState = RobotState(vector2d(0,0), 0.0, Map(), Map())
+  val initialState: RobotState = RobotState(Vector2d(0,0), 0.0, Map(), Map())
   // 1. Generate full map
   // 2. Walk robot around
   // 3. Render grey levels

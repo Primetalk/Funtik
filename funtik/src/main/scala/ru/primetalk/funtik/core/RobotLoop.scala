@@ -1,7 +1,9 @@
 package ru.primetalk.funtik.core
 
-import ru.primetalk.funtik.environment.{ Display, EnvironmentModel }
+import ru.primetalk.funtik.environment.geom2d.Vector2d
+import ru.primetalk.funtik.environment.{Display, EnvironmentModel}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
+import spire.syntax.all._
 
 sealed trait CellState
 
@@ -32,9 +34,9 @@ trait RobotLoop extends EnvironmentModel {
           currentPositionTimeSinceStartMs, currentSpeedEstimate, map),
         TimePassed(sinceStartMs)
         ) =>
-      val newPositionEstimate = currentPositionEstimate + currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
+      val newPositionEstimate = currentPositionEstimate // + currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
       if (target == currentPositionEstimate) {
-        (InternalRobotState(target, newPositionEstimate, sinceStartMs, (0, 0), map), List(SetSpeed(0, 0)))
+        (InternalRobotState(target, newPositionEstimate, sinceStartMs, Vector2d(0, 0), map), List(SetSpeed(0, 0)))
         // TODO: update map - add free cells along the bresenham line
       } else {
         val newSpeedDirection   = (target - currentPositionEstimate).toDouble.normalized
@@ -56,7 +58,7 @@ trait RobotLoop extends EnvironmentModel {
         InternalRobotState(target, currentPositionEstimate, currentPositionTimeSinceStartMs, currentSpeedEstimate, map),
         HitObstacle(sinceStartMs)
         ) =>
-      val newPositionEstimate = currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
-      (InternalRobotState(target, newPositionEstimate, sinceStartMs, (0, 0), map), Nil)
+      val newPositionEstimate = currentPositionEstimate // currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
+      (InternalRobotState(target, newPositionEstimate, sinceStartMs, Vector(0, 0), map), Nil)
   }
 }

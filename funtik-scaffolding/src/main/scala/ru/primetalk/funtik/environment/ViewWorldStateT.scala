@@ -2,7 +2,6 @@ package ru.primetalk.funtik.environment
 
 import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.ext.Color
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 
 trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
   implicit object ViewWorldState extends View[WorldState] {
