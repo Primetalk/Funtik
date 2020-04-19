@@ -9,21 +9,23 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
       new ViewDisplay[Boolean](if(_) Color.Green else Color.apply("#70a0a0"))
 
     override def render(worldState: WorldState, ctx: CanvasRenderingContext2D): Unit = {
+      ctx.beginPath()
       worldState.worldPointMap.render(ctx)
       setTransform(worldState.worldPointMap, ctx)
       ctx.strokeStyle = Color.Red.toString()
-      ctx.rotate(math.Pi - worldState.robotEnvState.rotation)
       ctx.lineWidth = 0.3
-      val x = worldState.robotEnvState.position.x
-      val y = worldState.robotEnvState.position.y
-      ctx.moveTo(x, y - 2)
-      ctx.lineTo(x, y + 2)
-      ctx.moveTo(x - 1, y + 1)
-      ctx.lineTo(x, y + 2)
-      ctx.moveTo(x + 1, y + 1)
-      ctx.lineTo(x, y + 2)
       ctx.fillStyle = Color.Red.toString()
-      ctx.fillRect(-0.5,-0.5,1,1)
+      val x = worldState.robotEnvState.solidBodyState.materialParticle.position.x
+      val y = worldState.robotEnvState.solidBodyState.materialParticle.position.y
+      ctx.translate(x, y) // set coordinates origin to the center of the robot
+      ctx.rotate(worldState.robotEnvState.solidBodyState.theta) // rotate the shape of the robot according to the current angle
+      ctx.moveTo(-2, 0)
+      ctx.lineTo(2, 0)
+      ctx.moveTo(1, -1)
+      ctx.lineTo(2, 0)
+      ctx.moveTo(1, 1)
+      ctx.lineTo(2, 0)
+      ctx.fillRect(- 0.5, - 0.5, 1, 1)
       ctx.stroke()
       clearTransform(ctx)
     }

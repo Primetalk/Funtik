@@ -1,7 +1,6 @@
 package ru.primetalk.funtik.environment
 
 import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
-import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.vector2d
 
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import ru.primetalk.funtik.environment.generator.{BSPTree, Tree}
@@ -9,7 +8,8 @@ import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ViewAll._
 import cats.data.State
 import ru.primetalk.funtik.environment.geom2d.Vector2d
-import spire.syntax.all._
+import ru.primetalk.funtik.environment.solid.SolidBodyModel._
+import squants.time.Milliseconds
 
 object MechanicsImpl extends ModelMechanics {
 
@@ -21,15 +21,16 @@ object MechanicsImpl extends ModelMechanics {
       Display.showPoints(points, true, false)
     }
 
-  val defaultDuration: FiniteDuration = 40.milliseconds
+  val defaultDuration: FiniteDuration = 400.milliseconds
 
   /** the returned Duration is the next event */
-  override def start: State[RandomStateValue, (ViewAll.WorldState, Duration)] = {
+  override def start(wallTimeMs: Long): State[RandomStateValue, (ViewAll.WorldState, Duration)] = {
     val rect = Rectangle(Vector2d(-40, -30), Vector2d(80, 60))
     generateDisplay(rect).map { display =>
       (
         WorldState(
-          RobotEnvState(vector2d(0, 0), 0.0, 0.0),
+          RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0,1.0), Vector2d(0.0,1.0),
+            Milliseconds(wallTimeMs)/su.time), 0.0, 0.1)),
           display
         ),
         defaultDuration
@@ -45,16 +46,14 @@ object MechanicsImpl extends ModelMechanics {
   override def handleEvent(
     state: ViewAll.WorldState,
     e: ViewAll.ModellingEvent
-  ): State[RandomStateValue, (ViewAll.WorldState, Duration)] = {
-    State.pure(
-      (
+  ): State[RandomStateValue, (ViewAll.WorldState, Duration)] = e match {
+    case ScaffoldingTimePassed(wallTimeMs) =>
+      State.pure(
         state.copy(
-          robotEnvState = state.robotEnvState.copy(
-            position = state.robotEnvState.position + vector2d(0, 1)
-          )
-        ),
-        defaultDuration
+            robotEnvState = state.robotEnvState.copy(
+              solidBodyState = state.robotEnvState.solidBodyState.integrate(Milliseconds(wallTimeMs)/su.time))
+            ),
+          defaultDuration
       )
-    )
   }
 }
