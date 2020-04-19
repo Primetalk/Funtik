@@ -1,11 +1,11 @@
 package ru.primetalk.funtik.environment
 
 import org.scalajs.dom
-import ru.primetalk.funtik.environment.genereator.{BSPTree, Leaf, Node, Tree}
-import ru.primetalk.funtik.environment.genereator.utils.Random
+import ru.primetalk.funtik.environment.generator.{BSPTree, Leaf, Node, Tree}
+import ru.primetalk.funtik.environment.generator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import cats.data.State
-import ru.primetalk.funtik.environment.genereator.utils.Random.RandomStateValue
+import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
 
 import scala.concurrent.duration.Duration
 import scala.scalajs.js.{Date, timers}
