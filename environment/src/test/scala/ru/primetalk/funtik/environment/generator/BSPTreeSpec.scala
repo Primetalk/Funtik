@@ -3,8 +3,8 @@ package ru.primetalk.funtik.environment.generator
 import org.specs2.Specification
 import org.specs2.matcher.MatchResult
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.Rectangle
-import ru.primetalk.funtik.environment.genereator._
-import ru.primetalk.funtik.environment.genereator.utils.Random
+import ru.primetalk.funtik.environment.generator._
+import ru.primetalk.funtik.environment.generator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils
 
 class BSPTreeSpec extends Specification { def is = s2"""
