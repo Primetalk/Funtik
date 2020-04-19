@@ -1,10 +1,10 @@
 package ru.primetalk.funtik.environment
 
-import ru.primetalk.funtik.environment.genereator.utils.Random.RandomStateValue
+import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils.vector2d
 
 import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
-import ru.primetalk.funtik.environment.genereator.{BSPTree, Tree}
+import ru.primetalk.funtik.environment.generator.{BSPTree, Tree}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ViewAll._
 import cats.data.State

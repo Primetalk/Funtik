@@ -1,6 +1,6 @@
-package ru.primetalk.funtik.environment.genereator
+package ru.primetalk.funtik.environment.generator
 
-import ru.primetalk.funtik.environment.genereator.utils.Random._
+import ru.primetalk.funtik.environment.generator.utils.Random._
 import ru.primetalk.funtik.environment.geom2d.Axis2d
 import ru.primetalk.funtik.environment.geom2d.Axis2d.{Horizontal, Vertical}
 

@@ -1,7 +1,7 @@
 package ru.primetalk.funtik.environment
 
 import cats.data.State
-import ru.primetalk.funtik.environment.genereator.utils.Random.{RandomState, RandomStateValue}
+import ru.primetalk.funtik.environment.generator.utils.Random.{RandomState, RandomStateValue}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import ru.primetalk.funtik.environment.geom2d.Vector2d
 
