@@ -17,7 +17,7 @@ object CellState {
 
 }
 
-trait RobotLoop extends EnvironmentModel {
+trait RobotLoopT extends EnvironmentModel {
 
   case class InternalRobotState(
     target: Vector,
@@ -26,6 +26,13 @@ trait RobotLoop extends EnvironmentModel {
     currentSpeedEstimate: Vector,
     map: Display[CellState])
 
+  val initialInternalRobotState = InternalRobotState(
+    target = Vector2d(10,10),
+    currentPositionEstimate = Vector2d(0,0),
+    currentPositionTimeSinceStartMs = 0L,
+    currentSpeedEstimate = Vector2d(0,0),
+    map = Display[CellState](Rectangle(Vector2d(-10,-10), Vector2d(21,21)))
+  )
   // stateFlatMap
   def handleSensorData: (InternalRobotState, RobotSensorData) => (InternalRobotState, List[RobotCommand]) = {
     case (

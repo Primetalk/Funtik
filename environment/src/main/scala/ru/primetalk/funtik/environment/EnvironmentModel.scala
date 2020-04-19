@@ -96,4 +96,7 @@ trait EnvironmentModel {
   case class SetSpeed(left: Double, right: Double) extends RobotCommand
   /** Takes an object in front of the robot. */
 //  case class Take() extends RobotCommand
+  /** An interface to robot "brains". Mechanics will call this
+   * strategy whenever something changes.  */
+  type RobotStrategy[S] = (S, RobotSensorData) => (S, List[RobotCommand])
 }
