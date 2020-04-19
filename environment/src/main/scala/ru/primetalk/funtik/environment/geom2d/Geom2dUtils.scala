@@ -133,26 +133,26 @@ trait Geom2dUtils[V] extends Vector2dSyntax[V] {
       }
     }
 
-    def splitAsList(axis: Axis2d, firstAxisSize: Int): List[Rectangle] = {
-      val (a, b) = split(axis, firstAxisSize)
+    def splitAsList(shorterAxis: Axis2d, firstAxisSize: Int): List[Rectangle] = {
+      val (a, b) = split(shorterAxis, firstAxisSize)
       List(a, b)
     }
-    def split(axis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
+    def split(shorterAxis: Axis2d, firstAxisSize: Int): (Rectangle, Rectangle) = {
 
-      val firstSize = axis match {
+      val firstSize = shorterAxis match {
         case Horizontal => vector2d(width, firstAxisSize)
         case Vertical => vector2d(firstAxisSize, height)
       }
       val first = Rectangle(topLeft, firstSize)
 
-      val secondStart = axis match {
+      val secondStart = shorterAxis match {
         case Horizontal =>
           vector2d(topLeft.x, topLeft.y + firstAxisSize - 1)
         case Vertical =>
           vector2d(topLeft.x + firstAxisSize - 1, topLeft.y)
       }
 
-      val secondSize = axis match {
+      val secondSize = shorterAxis match {
         case Horizontal =>
           vector2d(width, height - firstAxisSize + 1)
         case Vertical =>
