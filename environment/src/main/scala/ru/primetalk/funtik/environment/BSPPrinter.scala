@@ -1,8 +1,8 @@
 package ru.primetalk.funtik.environment
 
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-import ru.primetalk.funtik.environment.genereator._
-import ru.primetalk.funtik.environment.genereator.utils.Random
+import ru.primetalk.funtik.environment.generator._
+import ru.primetalk.funtik.environment.generator.utils.Random
 import ru.primetalk.funtik.environment.geom2d.Vector2d
 
 
