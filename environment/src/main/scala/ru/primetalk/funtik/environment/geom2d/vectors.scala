@@ -64,15 +64,6 @@ object Vector {
     override def plus(a: Vector3d[Axis], b: Vector3d[Axis]): Vector3d[Axis] = Vector3d(cmodule.plus(a.x, b.x), cmodule.plus(a.y, b.y), cmodule.plus(a.z, b.z))
   }
 
-
-//  implicit object fieldCmoduleInt extends Field[Int] with IntIsEuclideanRing with  CModule[Int, Int] {
-//    override def div(x: Int, y: Int): Int = x / y
-//
-//    override implicit def scalar: CRing[Int] = spire.implicits.IntAlgebra
-//
-//    override def timesl(r: Int, v: Int): Int = r * v
-//  }
-
   import spire.std._
 
 //  implicit val intField: Field[Int] = IntField
