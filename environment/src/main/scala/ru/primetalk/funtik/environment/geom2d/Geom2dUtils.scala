@@ -172,23 +172,23 @@ trait Geom2dUtils  {
 
   def square(size: Int): Rectangle = Rectangle(Vector2d(0, 0), Vector2d(size, size))
   // Here is the group of rotations by 90 degrees:
-  val rotateRight: Matrix2d = Matrix2d( 0, 1,-1, 0)
-  val rotateLeft: Matrix2d  = Matrix2d( 0,-1, 1, 0)
-  val rotateId: Matrix2d    = Matrix2d( 1, 0, 0, 1)
-  val rotate180: Matrix2d   = Matrix2d(-1, 0, 0,-1)
+  val rotateRight: Matrix2d[Int] = Matrix2d( 0, 1,-1, 0)
+  val rotateLeft: Matrix2d[Int]  = Matrix2d( 0,-1, 1, 0)
+  val rotateId: Matrix2d[Int]    = Matrix2d( 1, 0, 0, 1)
+  val rotate180: Matrix2d[Int]   = Matrix2d(-1, 0, 0,-1)
 
-  val rotations: List[Matrix2d] = List(rotateId, rotateRight, rotate180, rotateLeft)
+  val rotations: List[Matrix2d[Int]] = List(rotateId, rotateRight, rotate180, rotateLeft)
 
-  implicit class Matrix2dOps(rot: Matrix2d) {
+  implicit class Matrix2dIntOps(rot: Matrix2d[Int]) {
     def apply(p: Vector): Vector = (
       rot.a*p._1 + rot.b*p._2,
       rot.c*p._1 + rot.d*p._2
     ).toVector
-    def apply(other: Matrix2d): Matrix2d = Matrix2d(
+    def apply(other: Matrix2d[Int]): Matrix2d[Int] = Matrix2d[Int](
       a = rot.a*other.a+rot.b*other.c, b = rot.a*other.b+rot.b*other.d,
       c = rot.c*other.a+rot.d*other.c, d = rot.c*other.b+rot.d*other.d
     )
-    def *(other: Matrix2d): Matrix2d = Matrix2d(
+    def *(other: Matrix2d[Int]): Matrix2d[Int] = Matrix2d[Int](
       a = rot.a*other.a+rot.b*other.c, b = rot.a*other.b+rot.b*other.d,
       c = rot.c*other.a+rot.d*other.c, d = rot.c*other.b+rot.d*other.d
     )
