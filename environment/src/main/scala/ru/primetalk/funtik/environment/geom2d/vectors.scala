@@ -10,6 +10,7 @@ case class Vector2d[@sp(Int, Double) Axis](x: Axis, y: Axis) extends Vector[Axis
   def _2: Axis = y
   def transpose: Vector2d[Axis] =
     Vector2d(y, x)
+
 }
 
 case class Vector3d[@sp(Int, Double) Axis](x: Axis, y: Axis, z: Axis) extends Vector[Axis, 3] {
@@ -18,7 +19,10 @@ case class Vector3d[@sp(Int, Double) Axis](x: Axis, y: Axis, z: Axis) extends Ve
   def _3: Axis = z
 }
 
-case class Vector2dPolar(r: Double, theta: Double) extends Vector[Double, 2]
+case class Vector2dPolar(r: Double, theta: Double) extends Vector[Double, 2] {
+  def toVector2d: Vector2d[Double] =
+    Vector2d(r * math.cos(theta), r * math.sin(theta))
+}
 
 object Vector {
   implicit class Vector2dIntOps(v: Vector2d[Int]) {
@@ -37,6 +41,9 @@ object Vector {
       Vector2d(v.x / rr, v.y / rr)
     }
     def /(k: Double): Vector2d[Double] = Vector2d(v.x / k, v.y / k)
+
+    def toPolar: Vector2dPolar =
+      Vector2dPolar(length, math.atan2(v.y, v.x))
 
   }
 
