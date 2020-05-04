@@ -44,29 +44,5 @@ object lines2d {
     }
   }
 
-  val epsilon = 1e-10
-  /** Finds intersection of two lines. If there is an intersection,
-   * it returns `t1` and `t2` - parameter values for each line where they intersect.
-   * It solves the following equation
-   * r1 = r10 + v1 * t1 == r2 = r20 + v2 * t2
-   * v1 * t1 - v2 * t2 == - (r10 - r20)
-   * t = (t1, t2)
-   * v = (v1, -v2)
-   * vInv = v ** -1
-   * t = vInv * (r20 - r10)
-   */
-  def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear): Option[(Double, Double)] = {
-    val v1 = l1.velocity
-    val v2 = l2.velocity
-    val r10 = l1.r0
-    val r20 = l2.r0
-    val v = Matrix2d[Double](v1.x, -v2.x, v1.y, -v2.y)
-    val (vInv, d) = v.inverse
-    if(math.abs(d) < epsilon)
-      None
-    else {
-      val res = vInv * (r20 - r10)
-      Some((res.x, res.y))
-    }
-  }
+
 }

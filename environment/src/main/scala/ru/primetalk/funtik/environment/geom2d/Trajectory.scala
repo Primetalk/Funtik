@@ -61,4 +61,54 @@ object Trajectory {
       positiveDeltaPhase / omega
     }
   }
+
+  val epsilon = 1e-10
+
+  /** Finds intersection of two lines. If there is an intersection,
+   * it returns `t1` and `t2` - parameter values for each line where they intersect.
+   * It solves the following equation
+   * r1 = r10 + v1 * t1 == r2 = r20 + v2 * t2
+   * v1 * t1 - v2 * t2 == - (r10 - r20)
+   * t = (t1, t2)
+   * v = (v1, -v2)
+   * vInv = v ** -1
+   * t = vInv * (r20 - r10)
+   */
+  def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear): List[(Double, Double)] = {
+    val v1 = l1.velocity
+    val v2 = l2.velocity
+    val r10 = l1.r0
+    val r20 = l2.r0
+    val v = Matrix2d[Double](v1.x, -v2.x, v1.y, -v2.y)
+    val (vInv, d) = v.inverse
+    if(math.abs(d) < epsilon)
+      Nil
+    else {
+      val res = vInv * (r20 - r10)
+      List((res.x, res.y))
+    }
+  }
+
+  def intersection(c1: Trajectory.Circular, l2: Trajectory.Linear): List[(Double, Double)] = {
+
+    val center = c1.center
+    val TwoPointsLine(p1, p2) = l2.toTwoPointsLine
+    val l = lines2d.TwoPointsLine(p1 - center, p2 - center)
+    val dx = l.p2.x - l.p1.x
+    val dy = l.p2.y - l.p1.y
+    val dr = (l.p2 - l.p1).length
+    val D = l.p1.x * l.p2.y - l.p2.x * l.p1.y
+    val discriminant = c1.radius * c1.radius * dr * dr - D * D
+    Option.when(discriminant >= 0) {
+      val x1 = D * dy + math.signum(dy) * dx * math.sqrt(discriminant)
+      val y1 = -D * dx + math.abs(dy) * math.sqrt(discriminant)
+      val x2 = D * dy - math.signum(dy) * dx * math.sqrt(discriminant)
+      val y2 = -D * dx - math.abs(dy) * math.sqrt(discriminant)
+      val p1 = Vector2d[Double](x1, y1) + center
+      val p2 = Vector2d[Double](x2, y2) + center
+      val points = List(p1, p2)
+      points.
+        map(p => (c1.pointToParameter(p), l2.pointToParameter(p)))
+    }.toList.flatten
+  }
 }
