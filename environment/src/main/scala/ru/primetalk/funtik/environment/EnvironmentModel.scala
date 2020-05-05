@@ -3,6 +3,7 @@ package ru.primetalk.funtik.environment
 import cats.data.State
 import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
 import ru.primetalk.funtik.environment.geom2d.{Vector2d, Vector3d}
+import ru.primetalk.funtik.environment.solid._
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 
 import scala.concurrent.duration.Duration

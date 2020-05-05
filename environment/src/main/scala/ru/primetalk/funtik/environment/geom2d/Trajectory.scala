@@ -14,6 +14,8 @@ sealed trait Trajectory {
 
   def intersect(other: Trajectory): List[(Double, Double)] =
     Trajectory.intersectTrajectory(this, other)
+
+  def t0: Double
 }
 
 object Trajectory {
@@ -44,7 +46,7 @@ object Trajectory {
 
   case class Circular(center: Vector2d[Double], radius: Double, t0: Double, phase0: Double, omega: Double) extends Trajectory {
     override def integrate(t: Double): (Vector2d[Double], Vector2d[Double]) = {
-      val phase = (t - t0) * omega - phase0
+      val phase = (t - t0) * omega + phase0
       (
         center + Vector2dPolar(radius, phase).toVector2d,
         Vector2dPolar(radius * omega, phase + math.Pi / 2).toVector2d

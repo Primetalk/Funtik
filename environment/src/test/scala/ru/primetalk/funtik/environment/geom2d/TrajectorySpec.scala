@@ -2,7 +2,6 @@ package ru.primetalk.funtik.environment.geom2d
 
 import org.specs2.{ScalaCheck, Specification}
 import org.specs2.specification.core.SpecStructure
-import org.scalacheck.Prop
 
 class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaCheck { def is: SpecStructure =
 
