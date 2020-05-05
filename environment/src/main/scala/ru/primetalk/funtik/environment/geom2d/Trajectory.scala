@@ -11,6 +11,9 @@ sealed trait Trajectory {
   /** Returns parameter value for the point.
    * If point is not on the trajectory, the result is undefined. */
   def pointToParameter(p: Vector2d[Double]): Double
+
+  def intersect(other: Trajectory): List[(Double, Double)] =
+    Trajectory.intersectTrajectory(this, other)
 }
 
 object Trajectory {
@@ -138,5 +141,12 @@ object Trajectory {
         (c1.pointToParameter(p), c2.pointToParameter(p))
       )
     }
+  }
+
+  def intersectTrajectory(t1: Trajectory, t2: Trajectory): List[(Double, Double)] = (t1, t2) match {
+    case (l1: Linear, l2: Linear) => intersection(l1, l2)
+    case (c1: Circular, l2: Linear) => intersection(c1, l2)
+    case (c1: Circular, c2: Circular) => intersection(c1, c2)
+    case (l1: Linear, c2: Circular) => intersection(c2, l1).map(_.swap)
   }
 }
