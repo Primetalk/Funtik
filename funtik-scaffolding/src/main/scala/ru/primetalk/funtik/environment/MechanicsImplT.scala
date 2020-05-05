@@ -7,6 +7,7 @@ import ru.primetalk.funtik.environment.generator.{BSPTree, Tree}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import cats.data.State
 import ru.primetalk.funtik.environment.geom2d.Vector2d
+import ru.primetalk.funtik.environment.solid._
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 import squants.time.Milliseconds
 
@@ -33,8 +34,8 @@ trait MechanicsImplT extends EnvironmentModel {
             RobotEnvState(SolidBodyState(
               MaterialParticleState(
                 position = Vector2d(10.0, 10.0),
-                speed = Vector2d(0.0, 1.0),
-                orthogonalAcceleration = 0.0,
+                speed = Vector2d(0.0, 2.0),
+                orthogonalAcceleration = -0.3,
                 t = Milliseconds(wallTimeMs) / su.time
               ),
               theta = 0.0)),
