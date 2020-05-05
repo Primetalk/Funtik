@@ -45,6 +45,10 @@ object Vector {
     def toPolar: Vector2dPolar =
       Vector2dPolar(length, math.atan2(v.y, v.x))
 
+    def rotate(alpha: Double): Vector2d[Double] = {
+      val p = toPolar
+      p.copy(theta = p.theta + alpha).toVector2d
+    }
   }
 
   implicit object vector2dIntByAxis extends Vector2dIntByAxis[Vector2d[Int]] {

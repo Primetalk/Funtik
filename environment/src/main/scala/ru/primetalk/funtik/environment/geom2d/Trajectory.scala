@@ -111,4 +111,32 @@ object Trajectory {
         map(p => (c1.pointToParameter(p), l2.pointToParameter(p)))
     }.toList.flatten
   }
+
+  /**
+   * @see  Weisstein, Eric W. "Circle-Circle Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-CircleIntersection.html
+   */
+  def intersection(c1: Trajectory.Circular, c2: Trajectory.Circular): List[(Double, Double)] = {
+    val axisX = c2.center - c1.center
+    val distanceBetweenCenters = axisX.length
+    val d = distanceBetweenCenters
+    val R = c1.radius
+    val r = c2.radius
+    if (r + R > d)
+      Nil
+    else {
+      val x = (d * d - r * r + r * R) / 2 / d
+      val `y^2` = R * R - x * x
+      require(`y^2` >= 0, "Unexpected condition that y^2 < 0")
+      val y1 = math.sqrt(`y^2`)
+      val y2 = -y1
+      val v1 = Vector2d(x, y1)
+      val v2 = Vector2d(x, y2)
+      val vectors = List(v1, v2)
+      val theta = axisX.toPolar.theta
+      val points = vectors.map(v => v.rotate(theta) + c1.center)
+      points.map(p =>
+        (c1.pointToParameter(p), c2.pointToParameter(p))
+      )
+    }
+  }
 }
