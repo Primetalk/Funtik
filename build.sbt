@@ -3,7 +3,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 lazy val commonSettings = Seq(
   organization := "ru.primetalk",
   version := "0.1.0-SNAPSHOT", //
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.2",
   scalacOptions ++= Seq(
     "-Ymacro-annotations",// required for simulacrum starting from Scala 2.13+
     "-deprecation",
