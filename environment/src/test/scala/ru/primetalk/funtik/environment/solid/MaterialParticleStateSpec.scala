@@ -2,27 +2,37 @@ package ru.primetalk.funtik.environment.solid
 
 import org.specs2.Specification
 import SolidBodyModel._
-import org.specs2.matcher.MatchResult
-import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector2d}
+import spire.implicits._
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
+import ru.primetalk.funtik.environment.geom2d.{ Vector, Vector2d }
+import ru.primetalk.funtik.environment.geom2d.CollisionShape.LineSegment
 
 class MaterialParticleStateSpec extends Specification {
+
   def is = s2""" 
   MaterialParticleState should
-    detect simple collision $simpleCollision
+    detect collision up ${axisCollision(Up)}
+    detect collision right ${axisCollision(Right)}
+    detect collision left ${axisCollision(Left)}
+    detect collision down ${axisCollision(Down)}
+    detect collision up-right ${axisCollision(Up + Right)}
+    detect collision up-left ${axisCollision(Up + Left)}
+    detect collision down-left ${axisCollision(Down + Left)}
+    detect collision down-right ${axisCollision(Down + Right)}
   """
 
-  def simpleCollision: MatchResult[Seq[Axis]] = {
-    val position = Vector2d(0.0, 0.0)
-    val speed    = Vector2d(1.0, 0.0)
-    val state    = MaterialParticleState(position, speed, 0)
+  private val squareLines = Seq(
+    LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](39, -30)),
+    LineSegment(Vector2d[Double](39, -30), Vector2d[Double](39, 29)),
+    LineSegment(Vector2d[Double](39, 29), Vector2d[Double](-40, 29)),
+    LineSegment(Vector2d[Double](-40, 29), Vector2d[Double](-40, -30))
+  )
 
-    val squareLines = Seq(
-      CollisionShape.LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](39, -30)),
-      CollisionShape.LineSegment(Vector2d[Double](39, -30), Vector2d[Double](39, 29)),
-      CollisionShape.LineSegment(Vector2d[Double](39, 29), Vector2d[Double](-40, 29)),
-      CollisionShape.LineSegment(Vector2d[Double](-40, 29), Vector2d[Double](-40, -30))
-    )
-    val result = squareLines.flatMap(state.detectNearestCollision)
+  private def axisCollision(direction: Vector2d[Int]) = {
+    val position = Vector2d(0.0, 0.0)
+    val speed    = direction.toDouble
+    val state    = MaterialParticleState(position, speed, 0)
+    val result   = squareLines.flatMap(state.detectNearestCollision)
     result must not be empty
   }
 }
