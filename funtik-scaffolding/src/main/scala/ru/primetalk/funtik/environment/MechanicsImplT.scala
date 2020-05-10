@@ -75,6 +75,7 @@ trait MechanicsImplT extends EnvironmentModel {
         val lines = worldLines(worldState)
         println("Lines: " + lines.size)
         val materialParticle = worldState.robotEnvState.solidBodyState.materialParticle
+        println(s"Material $materialParticle")
         import Ordering.Double.TotalOrdering
         val collisions = lines.flatMap(materialParticle.detectNearestCollision)
         println("Collisions " + collisions.size)
