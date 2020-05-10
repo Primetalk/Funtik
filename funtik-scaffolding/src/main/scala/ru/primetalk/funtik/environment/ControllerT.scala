@@ -10,10 +10,10 @@ import scala.scalajs.js.{Date, timers}
 trait ControllerT extends ViewWorldStateT {
 
   // Mutable part of the program
-  class Controller
+  class Controller[S]
   (
     val ctx: dom.CanvasRenderingContext2D,
-    modelMechanics: ModelMechanics,
+    modelMechanics: ModelMechanics[S],
     seed: Long
   ) {
 
@@ -32,9 +32,9 @@ trait ControllerT extends ViewWorldStateT {
         runS(randomStream).
         value
 
-      def newStateAvailable: ((WorldState, Duration)) => Unit = {
+      def newStateAvailable: ((WorldState[S], Duration)) => Unit = {
         case (state, duration) =>
-          state.render(ctx)
+          ViewOps(state)(new ViewWorldState).render(ctx)
           timers.setTimeout(duration.toMillis) {
             val timePassed = ScaffoldingTimePassed(realTimeMs)
             randomStream = modelMechanics.handleEvent(state, timePassed).

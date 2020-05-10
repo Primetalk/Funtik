@@ -53,6 +53,8 @@ lazy val funtikScaffolding = (crossProject(JSPlatform).crossType(CrossType.Pure)
 ).jsSettings(
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "1.0.0",
+    "com.github.julien-truffaut" %%% "monocle-core" % "2.0.4",
+    "com.github.julien-truffaut" %%% "monocle-macro" % "2.0.4",
     "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
     "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
   ),

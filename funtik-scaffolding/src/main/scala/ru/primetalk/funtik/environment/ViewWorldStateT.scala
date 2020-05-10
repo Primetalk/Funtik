@@ -4,14 +4,14 @@ import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.ext.Color
 
 trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
-  implicit object ViewWorldState extends View[WorldState] {
+  class ViewWorldState[S] extends View[WorldState[S]] {
     implicit val displayView: ViewDisplay[Boolean] =
       new ViewDisplay[Boolean](if(_) Color.Green else Color.apply("#70a0a0"))
 
-    override def render(worldState: WorldState, ctx: CanvasRenderingContext2D): Unit = {
+    override def render(worldState: WorldState[S], ctx: CanvasRenderingContext2D): Unit = {
       ctx.beginPath()
-      worldState.worldPointMap.render(ctx)
-      setTransform(worldState.worldPointMap, ctx)
+      worldState.worldData.points.render(ctx)
+      setTransform(worldState.worldData.points, ctx)
       ctx.strokeStyle = Color.Red.toString()
       ctx.lineWidth = 0.3
       ctx.fillStyle = Color.Red.toString()

@@ -1,9 +1,11 @@
 package ru.primetalk.funtik.environment
 
 import cats.data.State
+import ru.primetalk.funtik.environment.generator.Tree
 import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
 import ru.primetalk.funtik.environment.geom2d.{Vector2d, Vector3d}
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
+import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 
 import scala.concurrent.duration.Duration
 // Environment should be able to represent the situation for "bring me the red ball from my room"-task.
@@ -30,6 +32,7 @@ trait EnvironmentModel {
   }
   type PointMap = Map[Point2D, PassByStatistics]
   type WorldPointMap = Display[Boolean]
+  case class WorldWithRooms(points: WorldPointMap, rooms: List[Rectangle])
 //  type WorldPointMap = Map[Point2D, Boolean] // Boolean - wall/free
 //  sealed trait ObjectAtPosition
 //  sealed trait Material extends ObjectAtPosition
@@ -44,8 +47,7 @@ trait EnvironmentModel {
 
   case class RobotEnvState(solidBodyState: SolidBodyState)
 
-  case class WorldState(robotEnvState: RobotEnvState, worldPointMap: WorldPointMap)
-
+  case class WorldState[S](robotEnvState: RobotEnvState, worldData: WorldWithRooms, robotMemory: S)
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)
   // initially robot is at the dock station and has no map
@@ -59,16 +61,16 @@ trait EnvironmentModel {
 
   case class ScaffoldingTimePassed(wallTimeMs: Long) extends ModellingEvent
 
-  trait ModelMechanics {
+  trait ModelMechanics[S] {
 
     /** the returned Duration is the next event */
-    def start(wallTimeMs: Long): State[RandomStateValue, (WorldState, Duration)]
+    def start(wallTimeMs: Long): State[RandomStateValue, (WorldState[S], Duration)]
     /**
      *  Receives an event from scaffolding (like real timer, key press, mouse click).
      *  Despite that we try to perform deterministic modelling, we still need
      *  to generate white noise for signals. Hence, Random state.
      */
-    def handleEvent(state: WorldState, e: ModellingEvent): State[RandomStateValue, (WorldState, Duration)]
+    def handleEvent(state: WorldState[S], e: ModellingEvent): State[RandomStateValue, (WorldState[S], Duration)]
 
 //    /** Calculate next event. */
 //    def nextTimerEventDelayMs(state: WorldState): Option[Long] = {
@@ -83,7 +85,7 @@ trait EnvironmentModel {
   case class TimePassed(sinceStartMs: Long) extends RobotSensorData
   /** This is an information that while moving forward we have hit an obstable.
    * Eventually we may have some details like robot side that was hit. */
-  case class HitObstacle(sinceStartMs: Long) extends RobotSensorData
+  case class HitObstacle() extends RobotSensorData
   /** The vectors are noisy and require filtering.
     */
   case class GyroscopeInfo(rotation: Vector3dDouble, acceleration: Vector3dDouble, magneticField: Vector3dDouble) extends RobotSensorData

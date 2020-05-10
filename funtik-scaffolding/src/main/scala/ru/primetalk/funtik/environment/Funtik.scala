@@ -20,7 +20,8 @@ object Funtik {
     val canvasElement = dom.document.getElementById(canvasId)
     val canvas = canvasElement.asInstanceOf[HTMLCanvasElement]
     val ctx = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    val controller = new Game.Controller(ctx, new Game.MechanicsImpl(Game.handleSensorData, Game.initialInternalRobotState), System.currentTimeMillis())
+    val mechanics = new Game.MechanicsImpl(Game.handleSensorData, Game.initialInternalRobotState)
+    val controller = new Game.Controller(ctx, mechanics, System.currentTimeMillis())
     controller.start()
   }
 

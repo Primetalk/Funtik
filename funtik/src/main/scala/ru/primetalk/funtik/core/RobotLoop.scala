@@ -5,6 +5,8 @@ import ru.primetalk.funtik.environment.{Display, EnvironmentModel}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import spire.syntax.all._
 
+import scala.util.Random
+
 sealed trait CellState
 
 object CellState {
@@ -26,7 +28,7 @@ trait RobotLoopT extends EnvironmentModel {
     currentSpeedEstimate: Vector,
     map: Display[CellState])
 
-  val initialInternalRobotState = InternalRobotState(
+  val initialInternalRobotState: InternalRobotState = InternalRobotState(
     target = Vector2d(10,10),
     currentPositionEstimate = Vector2d(0,0),
     currentPositionTimeSinceStartMs = 0L,
@@ -63,9 +65,13 @@ trait RobotLoopT extends EnvironmentModel {
       }
     case (
         InternalRobotState(target, currentPositionEstimate, currentPositionTimeSinceStartMs, currentSpeedEstimate, map),
-        HitObstacle(sinceStartMs)
+        HitObstacle()
         ) =>
       val newPositionEstimate = currentPositionEstimate // currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
-      (InternalRobotState(target, newPositionEstimate, sinceStartMs, Vector(0, 0), map), Nil)
+      val x = Random.nextInt(2)
+      val y = Random.nextInt(2)
+      val newSpeed = SetSpeed(x, y)
+      (InternalRobotState(target, newPositionEstimate, currentPositionTimeSinceStartMs, Vector(0, 0), map), List(newSpeed))
+    case other => throw new IllegalArgumentException(s"Unsupported sensor data")
   }
 }

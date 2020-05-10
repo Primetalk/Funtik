@@ -10,6 +10,10 @@ case class Vector2d[@sp(Int, Double) Axis](x: Axis, y: Axis) extends Vector[Axis
   def _2: Axis = y
   def transpose: Vector2d[Axis] =
     Vector2d(y, x)
+
+  def to[B](converter: Axis => B): Vector2d[B] = {
+    Vector2d(converter(x), converter(y))
+  }
 }
 
 case class Vector3d[@sp(Int, Double) Axis](x: Axis, y: Axis, z: Axis) extends Vector[Axis, 3] {

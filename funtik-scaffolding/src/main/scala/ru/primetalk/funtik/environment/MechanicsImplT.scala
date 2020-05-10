@@ -6,38 +6,55 @@ import scala.concurrent.duration.{Duration, DurationInt, FiniteDuration}
 import ru.primetalk.funtik.environment.generator.{BSPTree, Tree}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import cats.data.State
-import ru.primetalk.funtik.environment.geom2d.Vector2d
+import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector2d}
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 import squants.time.Milliseconds
 
 trait MechanicsImplT extends EnvironmentModel {
 
-  class MechanicsImpl[S](val robotStrategy: RobotStrategy[S], val initialRobotState: S) extends ModelMechanics {
+  class MechanicsImpl[S](val robotStrategy: RobotStrategy[S], val initialRobotState: S) extends ModelMechanics[S] {
 
     private def toPoints: Tree[Rectangle] => List[Vector2d[Int]] =
       Tree.eliminate[Rectangle, List[Position]](_.edges)(_ reverse_::: _)
 
-    def generateDisplay(rect: Rectangle): State[RandomStateValue, Display[Boolean]] =
-      BSPTree()(rect).map(toPoints).map { points =>
-        Display.showPoints(points, true, false)
-      }
+    private def toRooms: Tree[Rectangle] => List[Rectangle] =
+      Tree.eliminate[Rectangle, List[Rectangle]](List(_))(_ reverse_::: _)
 
-    val defaultDuration: FiniteDuration = 400.milliseconds
+
+    def generateDisplay: State[RandomStateValue, WorldWithRooms] = {
+      val rect = Rectangle(Vector2d(-40, -30), Vector2d(80, 60))
+      BSPTree(minSideSize = 10)(rect)
+        .map(t => toPoints(t) -> toRooms(t)).map { case (points, rooms) =>
+        val worldMap =  Display.showPoints(points, true, false)
+        WorldWithRooms(worldMap, rooms)
+      }
+    }
+
+    val defaultDuration: FiniteDuration = 40.milliseconds
 
     /** the returned Duration is the next event */
-    override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState, Duration)] = {
-      val rect = Rectangle(Vector2d(-40, -30), Vector2d(80, 60))
-      generateDisplay(rect).map { display =>
+    override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState[S], Duration)] = {
+      generateDisplay.map { world =>
         (
           WorldState(
             RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0, 1.0), Vector2d(0.0, 1.0),
               Milliseconds(wallTimeMs) / su.time), 0.0, 0.1)),
-            display
+            world,
+            initialRobotState
           ),
           defaultDuration
         )
       }
     }
+
+    import monocle.macros.GenLens
+
+    private val stateRobotMemoryLens = GenLens[WorldState[S]](_.robotMemory)
+
+    private val stateMaterialLens = GenLens[WorldState[S]](_.robotEnvState) composeLens
+      GenLens[RobotEnvState](_.solidBodyState) composeLens
+      GenLens[SolidBodyState](_.materialParticle)
+
 
     /**
      * Receives an event from scaffolding (like real timer, key press, mouse click).
@@ -45,17 +62,82 @@ trait MechanicsImplT extends EnvironmentModel {
      * to generate white noise for signals. Hence, Random state.
      */
     override def handleEvent(
-                              state: WorldState,
+                              state: WorldState[S],
                               e: ModellingEvent
-                            ): State[RandomStateValue, (WorldState, Duration)] = e match {
-      case ScaffoldingTimePassed(wallTimeMs) =>
-        State.pure(
-          state.copy(
-            robotEnvState = state.robotEnvState.copy(
-              solidBodyState = state.robotEnvState.solidBodyState.integrate(Milliseconds(wallTimeMs) / su.time))
-          ),
-          defaultDuration
+                            ): State[RandomStateValue, (WorldState[S], Duration)] = e match {
+      case ScaffoldingTimePassed(simulationTime) =>
+        val newState = discreteIntegrate(state, simulationTime)
+        State.pure(newState, defaultDuration)
+    }
+
+    def discreteIntegrate(state: WorldState[S], wallTime: Double): WorldState[S] = {
+
+      def discreteIntegrate0(worldState: WorldState[S], simulationTime: Double): WorldState[S] = {
+        val lines = worldLines(worldState)
+        println("Lines: " + lines.size)
+        val materialParticle = worldState.robotEnvState.solidBodyState.materialParticle
+        import Ordering.Double.TotalOrdering
+        val collisions = lines.flatMap(materialParticle.detectNearestCollision)
+        println("Collisions " + collisions.size)
+        val minHitTime = collisions.min
+
+        val hitBeforeWallTime = minHitTime <= simulationTime
+
+        val integrationTime = Math.min(minHitTime, simulationTime)
+        val timeIntegratedState = tickTime(worldState, integrationTime.toLong)
+
+        if(hitBeforeWallTime) {
+          val sensorData = HitObstacle()
+          val (newMemory, commands) = robotStrategy(worldState.robotMemory, sensorData)
+          assert(commands.size == 1)
+
+          val newWorldState = commands.head match {
+            case SetSpeed(left, right) =>
+              println(s"new speed $left, $right")
+              val newSpeed = Vector2d(left, right)
+              val material = timeIntegratedState.robotEnvState.solidBodyState.materialParticle.setSpeed(minHitTime, newSpeed)
+              stateRobotMemoryLens.set(newMemory)(
+                stateMaterialLens.set(material)(worldState)
+              )
+              discreteIntegrate0(worldState, simulationTime)
+            case other =>
+              println(s"ERROR - Unexpected command ${other.getClass}")
+              worldState
+          }
+          newWorldState
+        } else {
+          timeIntegratedState
+        }
+      }
+
+      discreteIntegrate0(state, wallTime)
+    }
+
+    def tickTime(worldState: WorldState[S], time: Long): WorldState[S] = {
+      val materialState = worldState.robotEnvState.solidBodyState.materialParticle.integrate(time)
+      val timeSensor  = TimePassed(time.toLong)
+      val (newMemory, commands) = robotStrategy(worldState.robotMemory, timeSensor)
+      assert(commands.isEmpty, "expected empty commands")
+      stateRobotMemoryLens.set(newMemory)(
+        stateMaterialLens.set(materialState)(worldState)
+      )
+    }
+
+
+
+    def worldLines(state: WorldState[S]): Seq[CollisionShape.Line[Axis]] = {
+      state.worldData.rooms.flatMap{ r =>
+        val result = Seq(
+          CollisionShape.Line(r.topLeft.to(_.toDouble), r.topRight.to(_.toDouble)),
+          CollisionShape.Line(r.topRight.to(_.toDouble), r.bottomRight.to(_.toDouble)),
+          CollisionShape.Line(r.bottomRight.to(_.toDouble), r.bottomLeft.to(_.toDouble)),
+          CollisionShape.Line(r.bottomLeft.to(_.toDouble), r.topLeft.to(_.toDouble))
         )
+        println(result.map(l => l.p1 -> l.p2).mkString(", "))
+        result
+      }
+
+
     }
   }
 
