@@ -35,13 +35,12 @@ trait MechanicsImplT extends EnvironmentModel {
     /** the returned Duration is the next event */
     override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState[S], Duration)] = {
       generateDisplay.map { world =>
+        val position = Vector2d(1.0, 1.0)
+        val speed = Vector2d(0.0, 1.0)
+        val material = MaterialParticleState(position, speed, Milliseconds(wallTimeMs) / su.time)
+        val solidBody = SolidBodyState(material, 0.0, 0.1)
         (
-          WorldState(
-            RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0, 1.0), Vector2d(0.0, 1.0),
-              Milliseconds(wallTimeMs) / su.time), 0.0, 0.1)),
-            world,
-            initialRobotState
-          ),
+          WorldState(RobotEnvState(solidBody), world, initialRobotState),
           defaultDuration
         )
       }
