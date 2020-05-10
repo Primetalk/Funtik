@@ -23,7 +23,7 @@ trait MechanicsImplT extends EnvironmentModel {
 
     def generateDisplay: State[RandomStateValue, WorldWithRooms] = {
       val rect = Rectangle(Vector2d(-40, -30), Vector2d(80, 60))
-      BSPTree(minSideSize = 10)(rect)
+      BSPTree(minSideSize = 40)(rect)
         .map(t => toPoints(t) -> toRooms(t)).map { case (points, rooms) =>
         val worldMap =  Display.showPoints(points, true, false)
         WorldWithRooms(worldMap, rooms)
@@ -35,8 +35,8 @@ trait MechanicsImplT extends EnvironmentModel {
     /** the returned Duration is the next event */
     override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState[S], Duration)] = {
       generateDisplay.map { world =>
-        val position = Vector2d(1.0, 1.0)
-        val speed = Vector2d(0.0, 1.0)
+        val position = Vector2d(0.0, 0.0)
+        val speed = Vector2d(1.0, 0.0)
         val material = MaterialParticleState(position, speed, Milliseconds(wallTimeMs) / su.time)
         val solidBody = SolidBodyState(material, 0.0, 0.1)
         (
