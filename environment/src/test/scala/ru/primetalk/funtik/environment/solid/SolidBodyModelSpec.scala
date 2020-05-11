@@ -14,8 +14,6 @@ class SolidBodyModelSpec extends Specification with ArbitraryMaterialParticle wi
          |MaterialParticle should not jump
          |$e1
          |
-         |Detect nearest collision should work for a simple case
-         | $e2
          |""".stripMargin
   def e1: ScalaCheckFunction1[MaterialParticleState, MatchResult[Double]] = {
     prop((materialParticleState : MaterialParticleState) => {
@@ -30,5 +28,4 @@ class SolidBodyModelSpec extends Specification with ArbitraryMaterialParticle wi
     )
   }
 
-  def e2 = ???
 }
