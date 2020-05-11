@@ -3,6 +3,7 @@ package ru.primetalk.funtik.environment.geom2d
 import spire.implicits._
 import Vector._
 import ru.primetalk.funtik.environment.geom2d.lines2d.{EquationLine, TwoPointsLine}
+import DoublePrecision.DoubleCompareOps
 //import spire.algebra.CModule
 
 sealed trait Trajectory {
@@ -74,27 +75,28 @@ object Trajectory {
    * It solves the following equation
    * r1 = r10 + v1 * t1 == r2 = r20 + v2 * t2
    * v1 * t1 - v2 * t2 == - (r10 - r20)
-   * t = (t1, t2)
-   * v = (v1, -v2)
+   * t = (t1, t2)  -- vector 2x1
+   * v = (v1, -v2) -- matrix 2x2
+   * v * t == r20 - r10
    * vInv = v ** -1
+   * vInv * v * t == vInv * (r20-r10)
+   * I        * t == vInv * (r20-r10)
    * t = vInv * (r20 - r10)
    */
-  def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear): List[(Double, Double)] = {
+  def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val v1 = l1.velocity
     val v2 = l2.velocity
     val r10 = l1.r0
     val r20 = l2.r0
     val v = Matrix2d[Double](v1.x, -v2.x, v1.y, -v2.y)
-    val (vInv, d) = v.inverse
-    if(math.abs(d) < epsilon)
-      Nil
-    else {
-      val res = vInv * (r20 - r10)
-      List((res.x, res.y))
-    }
+    val (vInv, determinant) = v.inverse
+    Option.when(determinant !~ 0.0)  {
+      val t = vInv * (r20 - r10)
+      t.toTuple
+    }.toList
   }
 
-  def intersection(c1: Trajectory.Circular, l2: Trajectory.Linear): List[(Double, Double)] = {
+  def intersection(c1: Trajectory.Circular, l2: Trajectory.Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
 
     val center = c1.center
     val TwoPointsLine(p1, p2) = l2.toTwoPointsLine
@@ -104,7 +106,7 @@ object Trajectory {
     val dr = (l.p2 - l.p1).length
     val D = l.p1.x * l.p2.y - l.p2.x * l.p1.y
     val discriminant = c1.radius * c1.radius * dr * dr - D * D
-    Option.when(discriminant >= 0) {
+    Option.when(discriminant >~ 0) {
       val x1 = D * dy + math.signum(dy) * dx * math.sqrt(discriminant)
       val y1 = -D * dx + math.abs(dy) * math.sqrt(discriminant)
       val x2 = D * dy - math.signum(dy) * dx * math.sqrt(discriminant)
@@ -120,13 +122,13 @@ object Trajectory {
   /**
    * @see  Weisstein, Eric W. "Circle-Circle Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-CircleIntersection.html
    */
-  def intersection(c1: Trajectory.Circular, c2: Trajectory.Circular): List[(Double, Double)] = {
+  def intersection(c1: Trajectory.Circular, c2: Trajectory.Circular)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val axisX = c2.center - c1.center
     val distanceBetweenCenters = axisX.length
     val d = distanceBetweenCenters
     val R = c1.radius
     val r = c2.radius
-    if (r + R > d)
+    if (r + R >~ d)
       Nil
     else {
       val x = (d * d - r * r + r * R) / 2 / d
@@ -145,7 +147,7 @@ object Trajectory {
     }
   }
 
-  def intersectTrajectory(t1: Trajectory, t2: Trajectory): List[(Double, Double)] = (t1, t2) match {
+  def intersectTrajectory(t1: Trajectory, t2: Trajectory)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = (t1, t2) match {
     case (l1: Linear, l2: Linear) => intersection(l1, l2)
     case (c1: Circular, l2: Linear) => intersection(c1, l2)
     case (c1: Circular, c2: Circular) => intersection(c1, c2)
