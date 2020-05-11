@@ -2,6 +2,8 @@ package ru.primetalk.funtik.environment.geom2d
 
 import spire.implicits._
 import Vector._
+import spire.algebra.CModule
+import DoublePrecision.DoubleCompareOps
 
 object lines2d {
 
@@ -44,5 +46,29 @@ object lines2d {
     }
   }
 
-
+  /** Finds intersection of two lines. If there is an intersection,
+   * it returns `t1` and `t2` - parameter values for each line where they intersect.
+   * It solves the following equation
+   * r1 = r10 + v1 * t1 == r2 = r20 + v2 * t2
+   * v1 * t1 - v2 * t2 == - (r10 - r20)
+   * t = (t1, t2)  -- vector 2x1
+   * v = (v1, -v2) -- matrix 2x2
+   * v * t == r20 - r10
+   * vInv = v ** -1
+   * vInv * v * t == vInv * (r20-r10)
+   * I        * t == vInv * (r20-r10)
+   * t = vInv * (r20 - r10)
+   */
+  def intersection(l1: ParametricLine[Double], l2: ParametricLine[Double])(implicit doublePrecision: DoublePrecision): Option[(Double, Double)] = {
+    val v1 = l1.v
+    val v2 = l2.v
+    val r10 = l1.r0
+    val r20 = l2.r0
+    val v = Matrix2d[Double](v1.x, -v2.x, v1.y, -v2.y)
+    val (vInv, determinant) = v.inverse
+    Option.when(determinant !~ 0.0) {
+      val t = vInv * (r20 - r10)
+      t.toTuple
+    }
+  }
 }
