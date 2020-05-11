@@ -4,7 +4,7 @@ import org.specs2.Specification
 import SolidBodyModel._
 import spire.implicits._
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-import ru.primetalk.funtik.environment.geom2d.{ Vector, Vector2d }
+import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector, Vector2d}
 import ru.primetalk.funtik.environment.geom2d.CollisionShape.LineSegment
 
 class MaterialParticleStateSpec extends Specification {
@@ -25,18 +25,12 @@ class MaterialParticleStateSpec extends Specification {
 
   private val upperBoundary: LineSegment[Double] = LineSegment(Vector2d(-40, 29), Vector2d(39, 29))
 
-  private val squareLines = Seq(
-    LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](39, -30)),
-    LineSegment(Vector2d[Double](39, -30), Vector2d[Double](39, 29)),
-    upperBoundary,
-    LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](-40, 29))
+  private val squareLines = CollisionShape.polygon[Double](
+    Vector2d(-40, -30),
+    Vector2d( 39, -30),
+    Vector2d( 39,  29),
+    Vector2d(-40,  29),
   )
-//  private val squareLines = Seq(
-//    LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](39, -30)),
-//    LineSegment(Vector2d[Double](39, -30), Vector2d[Double](39, 29)),
-//    LineSegment(Vector2d[Double](39, 29), Vector2d[Double](-40, 29)),
-//    LineSegment(Vector2d[Double](-40, 29), Vector2d[Double](-40, -30))
-//  )
 
   private def axisCollision(direction: Vector2d[Int]) = {
     val position = Vector2d(0.0, 0.0)
