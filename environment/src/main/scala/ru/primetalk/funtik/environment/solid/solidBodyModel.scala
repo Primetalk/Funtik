@@ -62,17 +62,8 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
           t2 >=0 && t2<=1 // we intersect between line segment ends
         )(t1)
       }.headOption
-    case (_, CollisionShape.OrthogonalSquare(center, side)) =>
-      val x1 = center.x - side / 2
-      val x2 = center.x + side / 2
-      val y1 = center.y - side / 2
-      val y2 = center.y + side / 2
-      val lineSegments = List(
-        CollisionShape.LineSegment(Vector2d(x1,y1), Vector2d(x2, y1)),
-        CollisionShape.LineSegment(Vector2d(x1,y1), Vector2d(x1, y2)),
-        CollisionShape.LineSegment(Vector2d(x2,y1), Vector2d(x2, y2)),
-        CollisionShape.LineSegment(Vector2d(x1,y2), Vector2d(x2, y2))
-      )
+    case (_, p: CollisionShape.Polygon[Double]) =>
+      val lineSegments = p.toLineSegments
       lineSegments.flatMap(detectNearestCollision).minOption
     case (l1: Trajectory.Linear, CollisionShape.Circle(center, radius)) => // See  Weisstein, Eric W. "Circle-Line Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-LineIntersection.html
       Trajectory.intersection(Trajectory.Circular(center, radius, 0, 0, 1), l1).
@@ -83,6 +74,14 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
       val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
 
       Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
+        map(_._1).
+        filter(_ >= t).
+        minOption
+    case (c1: Trajectory.Circular, CollisionShape.LineSegment(p1, p2)) =>
+      val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
+
+      Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
+        filter(t => t._2 >=0 && t._2 <=1).
         map(_._1).
         filter(_ >= t).
         minOption
