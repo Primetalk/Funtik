@@ -31,12 +31,6 @@ class MaterialParticleStateSpec extends Specification {
     upperBoundary,
     LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](-40, 29))
   )
-//  private val squareLines = Seq(
-//    LineSegment(Vector2d[Double](-40, -30), Vector2d[Double](39, -30)),
-//    LineSegment(Vector2d[Double](39, -30), Vector2d[Double](39, 29)),
-//    LineSegment(Vector2d[Double](39, 29), Vector2d[Double](-40, 29)),
-//    LineSegment(Vector2d[Double](-40, 29), Vector2d[Double](-40, -30))
-//  )
 
   private def axisCollision(direction: Vector2d[Int]) = {
     val position = Vector2d(0.0, 0.0)
