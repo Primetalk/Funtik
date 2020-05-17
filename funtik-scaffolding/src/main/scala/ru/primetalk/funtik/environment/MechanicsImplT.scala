@@ -127,17 +127,13 @@ trait MechanicsImplT extends EnvironmentModel {
 
     def worldLines(state: WorldState[S]): Seq[CollisionShape.Line[Axis]] = {
       state.worldData.rooms.flatMap{ r =>
-        val result = Seq(
-          CollisionShape.Line(r.topLeft.to(_.toDouble), r.topRight.to(_.toDouble)),
-          CollisionShape.Line(r.topRight.to(_.toDouble), r.bottomRight.to(_.toDouble)),
-          CollisionShape.Line(r.bottomRight.to(_.toDouble), r.bottomLeft.to(_.toDouble)),
-          CollisionShape.Line(r.bottomLeft.to(_.toDouble), r.topLeft.to(_.toDouble))
+        Seq(
+          CollisionShape.Line(r.topLeft.toDouble, r.topRight.toDouble),
+          CollisionShape.Line(r.topRight.toDouble, r.bottomRight.toDouble),
+          CollisionShape.Line(r.bottomRight.toDouble, r.bottomLeft.toDouble),
+          CollisionShape.Line(r.bottomLeft.toDouble, r.topLeft.toDouble)
         )
-        println(result.map(l => l.p1 -> l.p2).mkString(", "))
-        result
       }
-
-
     }
   }
 

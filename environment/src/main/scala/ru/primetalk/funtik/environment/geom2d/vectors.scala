@@ -8,12 +8,14 @@ sealed trait Vector[Axis, Size <: Int]
 case class Vector2d[@sp(Int, Double) Axis](x: Axis, y: Axis) extends Vector[Axis, 2] {
   def _1: Axis = x
   def _2: Axis = y
-  def transpose: Vector2d[Axis] =
-    Vector2d(y, x)
 
-  def to[B](converter: Axis => B): Vector2d[B] = {
-    Vector2d(converter(x), converter(y))
-  }
+  def transpose: Vector2d[Axis] = Vector2d(y, x)
+
+  def toTuple: (Axis, Axis) = (x, y)
+
+  def to[B](converter: Axis => B): Vector2d[B] = Vector2d(converter(x), converter(y))
+
+  def toDouble(implicit num: Numeric[Axis]): Vector2d[Double] =  to(num.toDouble)
 }
 
 case class Vector3d[@sp(Int, Double) Axis](x: Axis, y: Axis, z: Axis) extends Vector[Axis, 3] {
