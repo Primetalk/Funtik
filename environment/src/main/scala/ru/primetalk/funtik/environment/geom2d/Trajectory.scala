@@ -73,15 +73,15 @@ object Trajectory {
   /** Finds intersection of two lines. If there is an intersection,
    * it returns `t1` and `t2` - parameter values for each line where they intersect.
    * It solves the following equation
-   * r1 = r10 + v1 * t1 == r2 = r20 + v2 * t2
-   * v1 * t1 - v2 * t2 == - (r10 - r20)
-   * t = (t1, t2)  -- vector 2x1
+   * r1 = r10 + v1 * (t1 - t10) == r2 = r20 + v2 * t2
+   * v1 * (t1 - t10) - v2 * (t2 - t20) == - (r10 - r20)
+   * t = (t1 - t10, t2 - t20)  -- vector 2x1
    * v = (v1, -v2) -- matrix 2x2
-   * v * t == r20 - r10
+   * v * (t - t0) == r20 - r10
    * vInv = v ** -1
-   * vInv * v * t == vInv * (r20-r10)
-   * I        * t == vInv * (r20-r10)
-   * t = vInv * (r20 - r10)
+   * vInv * v * (t - t0) == vInv * (r20-r10)
+   * I        * (t - t0) == vInv * (r20-r10)
+   * t = vInv * (r20 - r10) + t0
    */
   def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val v1 = l1.velocity
@@ -92,7 +92,8 @@ object Trajectory {
     val (vInv, determinant) = v.inverse
     Option.when(determinant !~ 0.0)  {
       val t = vInv * (r20 - r10)
-      t.toTuple
+      val (t1, t2) = t.toTuple
+      (t1 + l1.t0, t2 + l2.t0)
     }.toList
   }
 

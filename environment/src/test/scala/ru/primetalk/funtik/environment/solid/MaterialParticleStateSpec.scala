@@ -9,6 +9,8 @@ import ru.primetalk.funtik.environment.geom2d.CollisionShape.LineSegment
 
 class MaterialParticleStateSpec extends Specification {
 
+  val t0: Double = squants.time.Milliseconds(System.currentTimeMillis())/su.time
+
   def is = s2""" 
   MaterialParticleState should
     detect collision right      ${axisCollision(Right)}
@@ -20,7 +22,7 @@ class MaterialParticleStateSpec extends Specification {
     detect collision down-left  ${axisCollision(Down + Left)}
     detect collision down-right ${axisCollision(Down + Right)}
 
-    detect collision one line up  ${shouldCollideWith(Up,  upperBoundary, 29)}
+    detect collision one line up  ${shouldCollideWith(Up,  upperBoundary, t0 + 29)}
   """
 
   private val upperBoundary: LineSegment[Double] = LineSegment(Vector2d(-40, 29), Vector2d(39, 29))
@@ -35,7 +37,7 @@ class MaterialParticleStateSpec extends Specification {
   private def axisCollision(direction: Vector2d[Int]) = {
     val position = Vector2d(0.0, 0.0)
     val speed    = direction.toDouble
-    val state    = MaterialParticleState(position, speed, 0, 0)
+    val state    = MaterialParticleState(position, speed, 0, t0)
     val result   = squareLines.flatMap(state.detectNearestCollision)
     result must not be empty
   }
@@ -43,7 +45,7 @@ class MaterialParticleStateSpec extends Specification {
   private def shouldCollideWith(direction: Vector2d[Int], line: LineSegment[Double], expectedTime: Double) = {
     val position = Vector2d(0.0, 0.0)
     val speed    = direction.toDouble
-    val state    = MaterialParticleState(position, speed, 0, 0)
+    val state    = MaterialParticleState(position, speed, 0, t0)
     val result   = state.detectNearestCollision(line)
     result must beSome (expectedTime)
   }

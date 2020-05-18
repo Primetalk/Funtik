@@ -51,29 +51,31 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
 
   def detectNearestCollision(shape: CollisionShape[Double]): Option[Double] = (trajectory, shape) match {
     case (l1: Trajectory.Linear, CollisionShape.Line(p1, p2)) =>
-      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(t)
+      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
       Trajectory.intersection(l1, l2).flatMap{ case (t1, _) =>
         Option.when(t1 > t)(t1)
       }.headOption
     case (l1: Trajectory.Linear, CollisionShape.LineSegment(p1, p2)) =>
-      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(t)
+      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
       Trajectory.intersection(l1, l2).flatMap{ case (t1, t2) =>
         Option.when(t1 > t &&
-          t2 >=0 && t2<=1 // we intersect between line segment ends
+          t2 >= 0 && t2 <= 1 // we intersect between line segment ends
         )(t1)
       }.headOption
     case (_, p: CollisionShape.Polygon[Double]) =>
       val lineSegments = p.toLineSegments
       lineSegments.flatMap(detectNearestCollision).minOption
     case (l1: Trajectory.Linear, CollisionShape.Circle(center, radius)) => // See  Weisstein, Eric W. "Circle-Line Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-LineIntersection.html
-      Trajectory.intersection(Trajectory.Circular(center, radius, 0, 0, 1), l1).
+      val c2 = Trajectory.Circular(center, radius, t0 = 0, phase0 = 0, omega = 1)
+      Trajectory.intersection(c2, l1).
         map(_._2).
         filter(_ >= t).
         minOption
     case (c1: Trajectory.Circular, CollisionShape.Line(p1, p2)) =>
       val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
 
-      Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
+      val l2 = l.toParametricLineDouble(0.0)
+      Trajectory.intersection(c1, l2).
         map(_._1).
         filter(_ >= t).
         minOption
@@ -81,7 +83,7 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
       val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
 
       Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
-        filter(t => t._2 >=0 && t._2 <=1).
+        filter(t => t._2 >= 0 && t._2 <= 1).
         map(_._1).
         filter(_ >= t).
         minOption
