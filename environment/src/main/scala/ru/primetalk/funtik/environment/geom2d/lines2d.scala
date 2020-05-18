@@ -21,9 +21,9 @@ object lines2d {
       )
     }
 
-    /** Important: p1 when t=0, p2 when t=1 */
+    /** Important: p1 when t=t0, p2 when t=t0+1 */
     def toParametricLineDouble(t0: Double): Trajectory.Linear = {
-      Trajectory.Linear(p1, p2 - p1, t0)
+      Trajectory.Linear(r0 = p1, velocity = p2 - p1, t0 = t0)
     }
   }
   /**
