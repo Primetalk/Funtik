@@ -15,8 +15,12 @@ object DoublePrecision {
       !this.~(other)(doublePrecision)
     def >~(other: Double)(implicit doublePrecision: DoublePrecision): Boolean =
       d - other > doublePrecision.epsilon
+    def >=~(other: Double)(implicit doublePrecision: DoublePrecision): Boolean =
+      d - other > -doublePrecision.epsilon
     def <~(other: Double)(implicit doublePrecision: DoublePrecision): Boolean =
       d - other < -doublePrecision.epsilon
+    def <=~(other: Double)(implicit doublePrecision: DoublePrecision): Boolean =
+      d - other < doublePrecision.epsilon
   }
 
 }
