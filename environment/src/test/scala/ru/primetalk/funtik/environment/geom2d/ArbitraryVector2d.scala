@@ -1,13 +1,31 @@
 package ru.primetalk.funtik.environment.geom2d
 
 import org.scalacheck.{Arbitrary, Gen}
+import shapeless.tag
+import shapeless.tag.@@
 
-trait ArbitraryVector2d {
-  implicit def arbVector2d: Arbitrary[Vector2d[Double]] =
+trait ArbitraryVector2d extends ArbitraryReasonableDouble {
+
+  def arbVector2dInRect(p1: Vector2d[Double], p2: Vector2d[Double]): Arbitrary[Vector2d[Double] ] = {
+    val Vector2d(x1, y1) = p1
+    val Vector2d(x2, y2) = p2
     Arbitrary(
       for {
-        x <- Gen.choose[Double](-1000.0, 1000.0)
-        y <- Gen.choose[Double](-1000.0, 1000.0)// Arbitrary.arbitrary[Double]
-      } yield Vector2d(x,y)
+        x <- Gen.choose[Double](x1, x2)
+        y <- Gen.choose[Double](y1, y2)
+      } yield Vector2d(x, y)
     )
+  }
+
+  sealed trait DirectionTag
+  implicit def arbDirection: Arbitrary[Vector2d[Double] @@ DirectionTag] =
+    Arbitrary(
+      arbReasonableDouble.arbitrary.
+        map(theta =>
+          tag[DirectionTag](Vector2dPolar(1, theta.value).toVector2d)
+        )
+    )
+
+  implicit def arbVector2d: Arbitrary[Vector2d[Double]] =
+    arbVector2dInRect(Vector2d(-1000.0, -1000.0), Vector2d(1000.0, 1000.0))
 }
