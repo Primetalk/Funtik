@@ -27,7 +27,9 @@ lazy val environment =
       "org.typelevel" %%% "algebra" % "2.0.0",
       "org.typelevel" %%% "spire" % "0.17.0-M1",
       "org.typelevel" %%% "squants"  % "1.6.0",
+      "com.chuusai" %%% "shapeless" % "2.3.3",
       "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
+
       "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
     )
   ).jvmSettings(
@@ -36,6 +38,7 @@ lazy val environment =
       "org.typelevel" %% "algebra" % "2.0.0",
       "org.typelevel" %% "spire" % "0.17.0-M1",
       "org.typelevel"  %% "squants"  % "1.6.0",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       "org.specs2" %% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.8.3" % Test
     )
