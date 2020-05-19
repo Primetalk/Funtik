@@ -27,6 +27,17 @@ object CollisionShape {
   def polygon[Axis](points: Vector2d[Axis]*): Seq[LineSegment[Axis]] =
     Polygon(points.toList).toLineSegments
 
+  def rectangle[Axis](p1: Vector2d[Axis], p2: Vector2d[Axis]): Seq[LineSegment[Axis]] = {
+    val Vector2d(x1, y1) = p1
+    val Vector2d(x2, y2) = p2
+    polygon(
+      Vector2d(x1, y1),
+      Vector2d(x2, y1),
+      Vector2d(x2, y2),
+      Vector2d(x1, y2),
+    )
+  }
+
   /** OrthogonalSquare has 4 sides parallel to axes.  */
   def orthogonalSquare(center: Vector2d[Double], side: Double): Polygon[Double] = {
     val x1 = center.x - side / 2
