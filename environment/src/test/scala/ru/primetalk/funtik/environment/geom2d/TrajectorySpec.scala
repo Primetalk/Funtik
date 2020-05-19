@@ -31,7 +31,7 @@ class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaChec
         |$e6
         |
         |Two circles should intersect in a known point
-        |$twoCircles
+        |$twoCirclesIntersection
         |
         |""".stripMargin
 
@@ -89,9 +89,9 @@ class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaChec
     )
   }
 
-  def twoCircles: MatchResult[Option[Double]] = {
+  def twoCirclesIntersection: MatchResult[List[Double]] = {
     val c1 = Trajectory.Circular(Vector2d(0.0,0.0), 1.0, 0, 0, 1)
-    val c2 = CollisionShape.Circle(Vector2d[Double](1.0,0.0), 1.0)
-    Trajectory.detectNearestCollision(c1, c2) must beSome(0.0)
+    val c2 = Trajectory.Circular(Vector2d(2.0,0.0), 1.0, 0, 0, 1)
+    Trajectory.intersection(c1, c2).map(_._1).distinct must be equalTo List(0.0)
   }
 }
