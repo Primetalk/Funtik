@@ -134,8 +134,8 @@ object Trajectory {
     else {
       val x = (d * d - r * r + r * R) / 2 / d
       val `y^2` = R * R - x * x
-      require(`y^2` >= 0, "Unexpected condition that y^2 < 0")
-      val y1 = math.sqrt(`y^2`)
+      require(`y^2` >~ 0, "Unexpected condition that y^2 < 0")
+      val y1 = math.sqrt(math.abs(`y^2`))
       val y2 = -y1
       val v1 = Vector2d(x, y1)
       val v2 = Vector2d(x, y2)
@@ -154,4 +154,47 @@ object Trajectory {
     case (c1: Circular, c2: Circular) => intersection(c1, c2)
     case (l1: Linear, c2: Circular) => intersection(c2, l1).map(_.swap)
   }
+
+  def detectNearestCollision(trajectory: Trajectory, shape: CollisionShape[Double]): Option[Double] = (trajectory, shape) match {
+    case (l1: Trajectory.Linear, CollisionShape.Line(p1, p2)) =>
+      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
+      Trajectory.intersection(l1, l2).flatMap{ case (t1, _) =>
+        Option.when(t1 > trajectory.t0)(t1)
+      }.headOption
+    case (l1: Trajectory.Linear, CollisionShape.LineSegment(p1, p2)) =>
+      val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
+      Trajectory.intersection(l1, l2).flatMap{ case (t1, t2) =>
+        Option.when(t1 > trajectory.t0 &&
+          t2 >= 0 && t2 <= 1 // we intersect between line segment ends
+        )(t1)
+      }.headOption
+    case (_, p: CollisionShape.Polygon[Double]) =>
+      p.toLineSegments.flatMap(detectNearestCollision(trajectory, _)).minOption
+    case (l1: Trajectory.Linear, CollisionShape.Circle(center, radius)) => // See  Weisstein, Eric W. "Circle-Line Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-LineIntersection.html
+      val c2 = Trajectory.Circular(center, radius, t0 = 0, phase0 = 0, omega = 1)
+      Trajectory.intersection(c2, l1).
+        map(_._2).
+        filter(_ >= trajectory.t0).
+        minOption
+    case (c1: Trajectory.Circular, CollisionShape.Line(p1, p2)) =>
+      val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
+
+      val l2 = l.toParametricLineDouble(0.0)
+      Trajectory.intersection(c1, l2).
+        map(_._1).
+        filter(_ >= trajectory.t0).
+        minOption
+    case (c1: Trajectory.Circular, CollisionShape.LineSegment(p1, p2)) =>
+      val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
+
+      Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
+        filter(t => t._2 >= 0 && t._2 <= 1).
+        map(_._1).
+        filter(_ >= trajectory.t0).
+        minOption
+    case (c1: Trajectory.Circular, c2: CollisionShape.Circle[Double]) =>
+      val c2t = Trajectory.Circular(c2.center, c2.radius, trajectory.t0, 0.0, 1.0)
+      c1.intersect(c2t).map(_._1).filter(_ > trajectory.t0).minOption
+  }
+
 }
