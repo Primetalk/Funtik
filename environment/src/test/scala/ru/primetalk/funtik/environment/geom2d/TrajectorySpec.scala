@@ -6,7 +6,7 @@ import ru.primetalk.funtik.environment.geom2d.lines2d.TwoPointsLine
 import spire.implicits._
 import Vector._
 import DoublePrecision.DoubleCompareOps
-import org.scalacheck.Arbitrary
+import org.specs2.matcher.MatchResult
 
 class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaCheck with ArbitraryReasonableDouble { def is: SpecStructure =
 
@@ -29,6 +29,10 @@ class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaChec
         |
         |Vector multiplied by scalar should have length appropriately changed.
         |$e6
+        |
+        |Two circles should intersect in a known point
+        |$twoCircles
+        |
         |""".stripMargin
 
   private def e1 = {
@@ -83,5 +87,11 @@ class TrajectorySpec extends Specification with ArbitraryVector2d with ScalaChec
       math.abs(v.length * kabs - vk.length)  must be lessThan 0.01
     }
     )
+  }
+
+  def twoCircles: MatchResult[Option[Double]] = {
+    val c1 = Trajectory.Circular(Vector2d(0.0,0.0), 1.0, 0, 0, 1)
+    val c2 = CollisionShape.Circle(Vector2d[Double](1.0,0.0), 1.0)
+    Trajectory.detectNearestCollision(c1, c2) must beSome(0.0)
   }
 }
