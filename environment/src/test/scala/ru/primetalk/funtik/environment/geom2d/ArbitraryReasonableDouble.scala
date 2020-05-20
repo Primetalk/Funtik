@@ -12,6 +12,10 @@ import org.scalacheck.{Arbitrary, Gen}
  */
 trait ArbitraryReasonableDouble {
   case class ReasonableDouble(value: Double)
+  object ReasonableDouble {
+    val MaxValue: Double = 1e+5
+    val MinValue: Double = -1e+5
+  }
   implicit def arbReasonableDouble: Arbitrary[ReasonableDouble] =
-    Arbitrary(Gen.choose[Double](-1e+5, 1e+5).map(ReasonableDouble))
+    Arbitrary(Gen.choose[Double](ReasonableDouble.MinValue, ReasonableDouble.MaxValue).map(ReasonableDouble(_)))
 }
