@@ -6,9 +6,9 @@ import shapeless.tag.@@
 
 trait ArbitraryVector2d extends ArbitraryReasonableDouble {
 
-  def arbVector2dInRect(p1: Vector2d[Double], p2: Vector2d[Double]): Arbitrary[Vector2d[Double] ] = {
-    val Vector2d(x1, y1) = p1
-    val Vector2d(x2, y2) = p2
+  def arbVector2dInRect(bottomLeft: Vector2d[Double], topRight: Vector2d[Double]): Arbitrary[Vector2d[Double] ] = {
+    val Vector2d(x1, y1) = bottomLeft
+    val Vector2d(x2, y2) = topRight
     Arbitrary(
       for {
         x <- Gen.choose[Double](x1, x2)
