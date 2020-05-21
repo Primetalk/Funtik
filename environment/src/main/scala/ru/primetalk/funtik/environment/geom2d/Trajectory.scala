@@ -31,14 +31,18 @@ object Trajectory {
     def toTwoPointsLine: TwoPointsLine =
       TwoPointsLine(r0, r0 + velocity)
     /** A function that calculates parameter for a point on a line.
-     * NB! it doesn't check if the point indeed on the line. If not - the result is undefined.*/
-    def pointToParameter(p: Vector2d[Double]): Double = {
-      val r = p - r0
-      if(math.abs(velocity.x) > math.abs(velocity.y)) {
-        r.x / velocity.x
+     * NB! it doesn't check if the point indeed on the line. If not - the result is undefined.
+     *
+     * r = r0 + v * (t - t0)
+     * t = t0 + (r - r0) / v
+     * */
+    def pointToParameter(r: Vector2d[Double]): Double = {
+      val dr = r - r0
+      t0 + (if(math.abs(velocity.x) > math.abs(velocity.y)) {
+        dr.x / velocity.x
       } else {
-        r.y / velocity.y
-      }
+        dr.y / velocity.y
+      })
     }
 
     override def integrate(t: Double): (Vector2d[Double], Vector2d[Double]) =
@@ -63,8 +67,15 @@ object Trajectory {
      * If point is not on the trajectory, the result is undefined. */
     override def pointToParameter(p: Vector2d[Double]): Double = {
       val phase = (p - center).toPolar.theta
-      val positiveDeltaPhase = (2 * math.Pi + phase - phase0) % (2 * math.Pi)
-      positiveDeltaPhase / omega
+      val positiveDeltaPhase =
+        (4 * math.Pi + (
+          if (omega > 0) {
+            phase - phase0
+          } else {
+            phase0 - phase
+          }
+        )) % (2 * math.Pi)
+      t0 + math.abs(positiveDeltaPhase / omega)
     }
   }
 
@@ -83,7 +94,7 @@ object Trajectory {
    * I        * (t - t0) == vInv * (r20-r10)
    * t = vInv * (r20 - r10) + t0
    */
-  def intersection(l1: Trajectory.Linear, l2: Trajectory.Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
+  def intersection(l1: Linear, l2: Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val v1 = l1.velocity
     val v2 = l2.velocity
     val r10 = l1.r0
@@ -97,33 +108,38 @@ object Trajectory {
     }.toList
   }
 
-  def intersection(c1: Trajectory.Circular, l2: Trajectory.Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
-
+  /**
+   * @see Weisstein, Eric W. "Circle-Line Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-LineIntersection.html
+   */
+  def intersection(c1: Circular, l2: Linear)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val center = c1.center
-    val TwoPointsLine(p1, p2) = l2.toTwoPointsLine
-    val l = lines2d.TwoPointsLine(p1 - center, p2 - center)
-    val dx = l.p2.x - l.p1.x
-    val dy = l.p2.y - l.p1.y
-    val dr = (l.p2 - l.p1).length
-    val D = l.p1.x * l.p2.y - l.p2.x * l.p1.y
-    val discriminant = c1.radius * c1.radius * dr * dr - D * D
-    Option.when(discriminant >~ 0) {
-      val x1 = D * dy + math.signum(dy) * dx * math.sqrt(discriminant)
-      val y1 = -D * dx + math.abs(dy) * math.sqrt(discriminant)
-      val x2 = D * dy - math.signum(dy) * dx * math.sqrt(discriminant)
-      val y2 = -D * dx - math.abs(dy) * math.sqrt(discriminant)
-      val p1 = Vector2d[Double](x1, y1) + center
-      val p2 = Vector2d[Double](x2, y2) + center
-      val points = List(p1, p2)
-      points.
-        map(p => (c1.pointToParameter(p), l2.pointToParameter(p)))
+    val r = c1.radius
+    val TwoPointsLine(p10, p20) = l2.toTwoPointsLine
+    val TwoPointsLine(Vector2d(x1, y1), Vector2d(x2, y2)) = lines2d.TwoPointsLine(p10 - center, p20 - center)
+    val dx = x2 - x1
+    val dy = y2 - y1
+    val `dr^2` = dx * dx + dy * dy
+    val D = x1 * y2 - x2 * y1
+    val discriminant = r * r * `dr^2` - D * D
+    Option.when(discriminant >=~ 0) {
+      val sqrtDiscriminant = math.sqrt(math.abs(discriminant))
+      val resultX1 = (D * dy + math.signum(dy) * dx * sqrtDiscriminant)/`dr^2`
+      val resultX2 = (D * dy - math.signum(dy) * dx * sqrtDiscriminant)/`dr^2`
+      val resultY1 = (-D * dx + math.abs(dy) * sqrtDiscriminant)/`dr^2`
+      val resultY2 = (-D * dx - math.abs(dy) * sqrtDiscriminant)/`dr^2`
+      val result1 = Vector2d[Double](resultX1, resultY1)
+      val result2 = Vector2d[Double](resultX2, resultY2)
+      val results = List(result1, result2)
+      results.
+        map(_ + center). // back to normal coordinates
+        map(result => (c1.pointToParameter(result), l2.pointToParameter(result)))
     }.toList.flatten
   }
 
   /**
    * @see  Weisstein, Eric W. "Circle-Circle Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-CircleIntersection.html
    */
-  def intersection(c1: Trajectory.Circular, c2: Trajectory.Circular)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
+  def intersection(c1: Circular, c2: Circular)(implicit doublePrecision: DoublePrecision): List[(Double, Double)] = {
     val axisX = c2.center - c1.center
     val distanceBetweenCenters = axisX.length
     val d = distanceBetweenCenters
@@ -156,45 +172,52 @@ object Trajectory {
   }
 
   def detectNearestCollision(trajectory: Trajectory, shape: CollisionShape[Double]): Option[Double] = (trajectory, shape) match {
-    case (l1: Trajectory.Linear, CollisionShape.Line(p1, p2)) =>
+    case (l1: Linear, CollisionShape.Line(p1, p2)) =>
       val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
-      Trajectory.intersection(l1, l2).flatMap{ case (t1, _) =>
+      intersection(l1, l2).flatMap{ case (t1, _) =>
         Option.when(t1 > trajectory.t0)(t1)
       }.headOption
-    case (l1: Trajectory.Linear, CollisionShape.LineSegment(p1, p2)) =>
+    case (l1: Linear, CollisionShape.LineSegment(p1, p2)) =>
       val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble(0)
-      Trajectory.intersection(l1, l2).flatMap{ case (t1, t2) =>
+      intersection(l1, l2).flatMap{ case (t1, t2) =>
         Option.when(t1 > trajectory.t0 &&
           t2 >= 0 && t2 <= 1 // we intersect between line segment ends
         )(t1)
       }.headOption
     case (_, p: CollisionShape.Polygon[Double]) =>
       p.toLineSegments.flatMap(detectNearestCollision(trajectory, _)).minOption
-    case (l1: Trajectory.Linear, CollisionShape.Circle(center, radius)) => // See  Weisstein, Eric W. "Circle-Line Intersection." From MathWorld--A Wolfram Web Resource. https://mathworld.wolfram.com/Circle-LineIntersection.html
-      val c2 = Trajectory.Circular(center, radius, t0 = 0, phase0 = 0, omega = 1)
-      Trajectory.intersection(c2, l1).
+    case (l1: Linear, CollisionShape.Circle(center, radius)) =>
+      val c2 = Circular(center, radius, t0 = 0, phase0 = 0, omega = 1)
+      intersection(c2, l1).
         map(_._2).
-        filter(_ >= trajectory.t0).
+        filter(_ >= l1.t0).
         minOption
-    case (c1: Trajectory.Circular, CollisionShape.Line(p1, p2)) =>
-      val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
-
-      val l2 = l.toParametricLineDouble(0.0)
-      Trajectory.intersection(c1, l2).
+    case (c1: Circular, CollisionShape.Line(p1, p2)) =>
+      val l2 = lines2d.
+        TwoPointsLine(p1, p2).
+        toParametricLineDouble(0.0)
+      intersection(c1, l2).
         map(_._1).
-        filter(_ >= trajectory.t0).
+        filter(_ >= c1.t0).
         minOption
-    case (c1: Trajectory.Circular, CollisionShape.LineSegment(p1, p2)) =>
-      val l = lines2d.TwoPointsLine(p1 - c1.center, p2 - c1.center)
+    case (c1: Circular, CollisionShape.LineSegment(p1, p2)) =>
+      val l2 = lines2d.
+        TwoPointsLine(p1, p2).
+        toParametricLineDouble(0.0)
 
-      Trajectory.intersection(c1, l.toParametricLineDouble(0.0)).
-        filter(t => t._2 >= 0 && t._2 <= 1).
+      val list = intersection(c1, l2)
+      list.foreach(t => require(t._1 >= c1.t0))
+      val filtered = list.
+        filter(t =>
+          t._2 >= 0 && t._2 <= 1 &&
+            t._1 > c1.t0)
+      println(s"t0=${c1.t0}; c1.r=${c1.radius}; omega=${c1.omega} list: $list; filtered=$filtered; $c1")
+      filtered.
         map(_._1).
-        filter(_ >= trajectory.t0).
         minOption
-    case (c1: Trajectory.Circular, c2: CollisionShape.Circle[Double]) =>
-      val c2t = Trajectory.Circular(c2.center, c2.radius, trajectory.t0, 0.0, 1.0)
-      c1.intersect(c2t).map(_._1).filter(_ > trajectory.t0).minOption
+    case (c1: Circular, c2: CollisionShape.Circle[Double]) =>
+      val c2t = Circular(c2.center, c2.radius, trajectory.t0, 0.0, 1.0)
+      c1.intersect(c2t).map(_._1).filter(_ > c1.t0).minOption
   }
 
 }
