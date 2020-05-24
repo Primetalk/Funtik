@@ -6,7 +6,9 @@ object CollisionShape {
 
   case class Line[Axis](p1: Vector2d[Axis], p2: Vector2d[Axis]) extends CollisionShape[Axis]
 
-  case class LineSegment[Axis](p1: Vector2d[Axis], p2: Vector2d[Axis]) extends CollisionShape[Axis]
+  case class LineSegment[Axis](p1: Vector2d[Axis], p2: Vector2d[Axis]) extends CollisionShape[Axis] {
+    def toLine: Line[Axis] = Line(p1, p2)
+  }
 
   case class Circle[Axis](center: Vector2d[Axis], radius: Axis) extends CollisionShape[Axis]
 
