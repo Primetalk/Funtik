@@ -164,11 +164,9 @@ object Trajectory {
       val resultY2 = (-D * dx - math.abs(dy) * sqrtDiscriminant)/`dr^2`
       val result1 = Vector2d[Double](resultX1, resultY1)
       val result2 = Vector2d[Double](resultX2, resultY2)
-      val results = List(result1, result2)
-      results.
-        map(_ + center). // back to normal coordinates
-        map{p => print(s" intersection=$p ");p}
-    }.toList.flatten
+      List(result1, result2)
+    }.toList.flatten.
+      map(_ + center) // back to normal coordinates
   }
 
   /**
