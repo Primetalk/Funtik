@@ -1,6 +1,6 @@
 package ru.primetalk.funtik.environment.solid
 
-import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Trajectory, Vector2d, Vector2dPolar, lines2d}
+import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Trajectory, TrajectoryCoordinates, Vector2d, Vector2dPolar, lines2d}
 import squants.space.{Length, Meters}
 import squants.time.{Seconds, Time}
 import spire.syntax.all._
@@ -25,11 +25,11 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
       val v = polarSpeed.r
       val a = math.abs(orthogonalAcceleration)
       val r = v * v / a
-      val phase = polarSpeed.theta - math.Pi / 2 + (if(orthogonalAcceleration < 0) 0 else math.Pi)
+      val phase = polarSpeed.theta - math.Pi / 2 + (if(orthogonalAcceleration >= 0) 0 else math.Pi)
 
       val relativePosition = Vector2dPolar(r, phase).toVector2d
       val center = position - relativePosition
-      val omega = v / r * (if(orthogonalAcceleration < 0) 1 else -1)
+      val omega = v / r * Trajectory.sgn(orthogonalAcceleration)
 
       Trajectory.Circular(
         center = center,
@@ -49,7 +49,7 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
     )
   }
 
-  def detectNearestCollision(shape: CollisionShape[Double]): Option[Double] =
+  def detectNearestCollision(shape: CollisionShape[Double]): Option[TrajectoryCoordinates] =
     Trajectory.detectNearestCollision(trajectory, shape)
 
   def setSpeed(t1: Double, speed: Vector2d[Double]): MaterialParticleState =
