@@ -35,7 +35,7 @@ object Vector {
   }
 
   implicit class Vector2dDoubleOps(v: Vector2d[Double]) {
-    def length: Double = math.sqrt(v.x * v.x + v.y * v.y)
+    def length: Double = math.hypot(v.x, v.y)
     def normalized: Vector2d[Double] = {
       val rr = length
       Vector2d(v.x / rr, v.y / rr)
