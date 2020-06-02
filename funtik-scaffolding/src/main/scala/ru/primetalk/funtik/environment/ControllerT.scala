@@ -1,8 +1,9 @@
 package ru.primetalk.funtik.environment
 
 import org.scalajs.dom
+import org.scalajs.dom.CanvasRenderingContext2D
 import ru.primetalk.funtik.environment.generator.utils.Random
-import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
+import ru.primetalk.funtik.environment.generator.utils.Random.{RandomState, RandomStateValue}
 
 import scala.concurrent.duration.Duration
 import scala.scalajs.js.{Date, timers}
@@ -10,10 +11,12 @@ import scala.scalajs.js.{Date, timers}
 trait ControllerT extends ViewWorldStateT {
 
   // Mutable part of the program
-  class Controller
+  class Controller[S]
   (
     val ctx: dom.CanvasRenderingContext2D,
-    modelMechanics: ModelMechanics,
+    modelMechanics: ModelMechanics[S],
+    viewWorldState: ViewWorldState[S],
+    initialState: S,
     seed: Long
   ) {
 
@@ -27,14 +30,14 @@ trait ControllerT extends ViewWorldStateT {
 
       var randomStream: RandomStateValue = Random.stream(seed)
       randomStream = modelMechanics.
-        start(realTimeMs).
+        start(realTimeMs, initialState).
         map(newStateAvailable).
         runS(randomStream).
         value
 
-      def newStateAvailable: ((WorldState, Duration)) => Unit = {
+      def newStateAvailable: ((WorldState[S], Duration)) => Unit = {
         case (state, duration) =>
-          state.render(ctx)
+          viewWorldState.render(state, ctx)
           timers.setTimeout(duration.toMillis.toDouble) {
             val timePassed = ScaffoldingTimePassed(realTimeMs)
             randomStream = modelMechanics.handleEvent(state, timePassed).
