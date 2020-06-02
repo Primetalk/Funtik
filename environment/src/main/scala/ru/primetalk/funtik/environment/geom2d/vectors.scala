@@ -49,6 +49,11 @@ object Vector {
       val p = toPolar
       p.copy(theta = p.theta + alpha).toVector2d
     }
+    def withLength(l: Double): Vector2d[Double] = {
+      val p = toPolar
+      p.copy(r = l).toVector2d
+    }
+
   }
 
   implicit object vector2dIntByAxis extends Vector2dIntByAxis[Vector2d[Int]] {
