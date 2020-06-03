@@ -10,6 +10,7 @@ import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector2d}
 import ru.primetalk.funtik.environment.solid.{SolidBodyRotationParameters, _}
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 import squants.time.Milliseconds
+import ru.primetalk.funtik.environment.geom2d.DoublePrecision.DoubleCompareOps
 
 trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
 
@@ -59,40 +60,47 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
       case ScaffoldingTimePassed(wallTimeMs) =>
         val wallTime = Milliseconds(wallTimeMs) / su.time
         state match {
-          case WorldState(RobotEnvState(solidBodyState), robotInternalState, worldPointMap) =>
-            val points = worldPointMapToCollisionShapes(worldPointMap)
-            val minTimeOpt = points.
-              flatMap(solidBodyState.materialParticle.detectNearestCollision).
-              map(_.t).
-              minOption
-            val t1 = minTimeOpt.getOrElse(wallTime)
-            val SolidBodyState(materialParticle1, theta1) = solidBodyState.integrate(t1)
+          case WorldState(RobotEnvState(solidBodyState0), robotInternalState, worldPointMap) =>
+            val minTimeOpt = findNearestCollisionTime(solidBodyState0, worldPointMap)
+            val t1 = (wallTime :: minTimeOpt.toList).min // it's either collision or modelling duration.
             val t1ms = (t1 * su.time).millis
-            val (rst1, commands1) = robotStrategy(robotInternalState, TimePassed(t1ms))
+            val SolidBodyState(materialParticleAtT1, thetaAtT1) = solidBodyState0.integrate(t1)
+            val (robotState1, commands1) = robotStrategy(robotInternalState, TimePassed(t1ms))
             // TOOD: issue GyroscopeInfo to robot ?
-            val (rst12, commands) = if(minTimeOpt.isDefined) {
-              val (rst2, commands2) = robotStrategy(rst1, HitObstacle(t1ms))
-              val (rst3, commands3) = robotStrategy(rst2, TimePassed(wallTimeMs))
-              (rst3, commands1 ::: commands2 ::: commands3)
+            val (robotStateAtWallTime, commands) = if(t1 !~  wallTime) {
+              val (robotState1hit, commands2) = robotStrategy(robotState1, HitObstacle(t1ms))
+              val (robotState2, commands3) = robotStrategy(robotState1hit, TimePassed(wallTimeMs))
+              (robotState2, commands1 ::: commands2 ::: commands3)
             } else
-              (rst1, commands1)
+              (robotState1, commands1)
             // we ignore all commands except the last one
-            // because there is a natural delay between issueing command and seeing it's result.
-            val setSpeedOpt = commands.lastOption.collect{ case s@SetSpeed(_, _) => s }
-            val newMaterialParticleState = setSpeedOpt.map{ case SetSpeed(left, right) =>
-              val SolidBodyRotationParameters(tangentialVelocity, orthogonalAcceleration) = robot.convertTwoWheelsSpeedToSpeedAndOmega(left, right)
-              materialParticle1.copy(speed = materialParticle1.speed.withLength(tangentialVelocity), orthogonalAcceleration = orthogonalAcceleration)
-            }.getOrElse(materialParticle1)
+            // because there is a natural delay between issuing command and seeing it's result.
+            val newMaterialParticleState = commands.foldLeft(materialParticleAtT1)(applyCommand)
+
+            val solidBodyState2 = SolidBodyState(newMaterialParticleState, thetaAtT1).integrate(wallTime)
 
             val newState =
               state.copy(
-                robotEnvState = RobotEnvState(SolidBodyState(newMaterialParticleState, theta1)),
-                robotInternalState = rst12,
+                robotEnvState = RobotEnvState(solidBodyState2),
+                robotInternalState = robotStateAtWallTime,
               )
             State.pure((newState, defaultDuration))
         }
 
     }
+  }
+
+  private def findNearestCollisionTime[S](solidBodyState: SolidBodyState, worldPointMap: WorldPointMap) = {
+    worldPointMapToCollisionShapes(worldPointMap).
+      flatMap(solidBodyState.materialParticle.detectNearestCollision).
+      map(_.t).
+      minOption
+  }
+
+  def applyCommand(materialParticleState: MaterialParticleState, command: RobotCommand): MaterialParticleState = command match {
+    case SetSpeed(left, right) =>
+      val SolidBodyRotationParameters(tangentialVelocity, orthogonalAcceleration) = robot.convertTwoWheelsSpeedToSpeedAndOmega(left, right)
+      materialParticleState.copy(speed = materialParticleState.speed.withLength(tangentialVelocity), orthogonalAcceleration = orthogonalAcceleration)
   }
 
   def worldPointMapToCollisionShapes(worldPointMap: WorldPointMap): List[CollisionShape[Double]] = {

@@ -3,6 +3,7 @@ package ru.primetalk.funtik.environment
 import ru.primetalk.funtik.environment.solid.RobotGeometry
 import ru.primetalk.funtik.environment.solid.SolidBodyModel.su
 import squants.space.Centimeters
+
 trait RobotDefinitionT {
   val robot: RobotGeometry
 }
