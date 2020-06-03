@@ -35,9 +35,12 @@ trait MechanicsImplT extends EnvironmentModel {
     /** the returned Duration is the next event */
     override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState[S], Duration)] = {
       generateDisplay.map { world =>
-        val position = Vector2d(0.0, 0.0)
-        val speed = Vector2d(1.0, 0.0)
-        val material = MaterialParticleState(position, speed, Milliseconds(wallTimeMs) / su.time)
+
+        val material = MaterialParticleState(
+          position = Vector2d(1.0, 1.0),
+          speed = Up.toDouble,
+          Milliseconds(wallTimeMs) / su.time
+        )
         val solidBody = SolidBodyState(material, 0.0, 0.1)
         (
           WorldState(RobotEnvState(solidBody), world, initialRobotState),
@@ -65,25 +68,31 @@ trait MechanicsImplT extends EnvironmentModel {
                               e: ModellingEvent
                             ): State[RandomStateValue, (WorldState[S], Duration)] = e match {
       case ScaffoldingTimePassed(simulationTime) =>
-        val newState = discreteIntegrate(state, simulationTime)
+        val time = Milliseconds(simulationTime) / su.time
+        println(s"TICK! $time")
+        val newState = discreteIntegrate(state, time)
         State.pure(newState, defaultDuration)
     }
 
     def discreteIntegrate(state: WorldState[S], wallTime: Double): WorldState[S] = {
 
       def discreteIntegrate0(worldState: WorldState[S], simulationTime: Double): WorldState[S] = {
+        println(s"discreteIntegrate0! $simulationTime")
         val lines = worldLines(worldState)
-        println("Lines: " + lines.size)
+        println("Lines count: " + lines.size)
+        println("Lines:\n" + lines.map(l => l.p1 -> l.p2).mkString("\n"))
         val materialParticle = worldState.robotEnvState.solidBodyState.materialParticle
         println(s"Material $materialParticle")
-        import Ordering.Double.TotalOrdering
         val collisions = lines.flatMap(materialParticle.detectNearestCollision)
         println("Collisions " + collisions.size)
-        val minHitTime = collisions.min
-
+        import Ordering.Double.TotalOrdering
+        val deltaTime = collisions.minOption.getOrElse(throw new IllegalStateException("No collision detected"))
+        println(s"deltaTime = $deltaTime")
+        val minHitTime = math.abs(deltaTime) + simulationTime
         val hitBeforeWallTime = minHitTime <= simulationTime
 
         val integrationTime = Math.min(minHitTime, simulationTime)
+        println("IntegrateTime: "  + integrationTime)
         val timeIntegratedState = tickTime(worldState, integrationTime.toLong)
 
         if(hitBeforeWallTime) {
@@ -96,10 +105,10 @@ trait MechanicsImplT extends EnvironmentModel {
               println(s"new speed $left, $right")
               val newSpeed = Vector2d(left, right)
               val material = timeIntegratedState.robotEnvState.solidBodyState.materialParticle.setSpeed(minHitTime, newSpeed)
-              stateRobotMemoryLens.set(newMemory)(
+              val newState = stateRobotMemoryLens.set(newMemory)(
                 stateMaterialLens.set(material)(worldState)
               )
-              discreteIntegrate0(worldState, simulationTime)
+              discreteIntegrate0(newState, simulationTime)
             case other =>
               println(s"ERROR - Unexpected command ${other.getClass}")
               worldState
@@ -125,13 +134,13 @@ trait MechanicsImplT extends EnvironmentModel {
 
 
 
-    def worldLines(state: WorldState[S]): Seq[CollisionShape.Line[Axis]] = {
+    def worldLines(state: WorldState[S]): Seq[CollisionShape.LineSegment[Double]] = {
       state.worldData.rooms.flatMap{ r =>
         Seq(
-          CollisionShape.Line(r.topLeft.toDouble, r.topRight.toDouble),
-          CollisionShape.Line(r.topRight.toDouble, r.bottomRight.toDouble),
-          CollisionShape.Line(r.bottomRight.toDouble, r.bottomLeft.toDouble),
-          CollisionShape.Line(r.bottomLeft.toDouble, r.topLeft.toDouble)
+          CollisionShape.LineSegment(r.topLeft.toDouble, r.topRight.toDouble),
+          CollisionShape.LineSegment(r.topRight.toDouble, r.bottomRight.toDouble),
+          CollisionShape.LineSegment(r.bottomRight.toDouble, r.bottomLeft.toDouble),
+          CollisionShape.LineSegment(r.bottomLeft.toDouble, r.topLeft.toDouble)
         )
       }
     }

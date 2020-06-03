@@ -4,7 +4,7 @@ import org.specs2.Specification
 import SolidBodyModel._
 import spire.implicits._
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
-import ru.primetalk.funtik.environment.geom2d.{ Vector, Vector2d }
+import ru.primetalk.funtik.environment.geom2d.Vector2d
 import ru.primetalk.funtik.environment.geom2d.CollisionShape.LineSegment
 
 class MaterialParticleStateSpec extends Specification {
@@ -35,7 +35,7 @@ class MaterialParticleStateSpec extends Specification {
   private def axisCollision(direction: Vector2d[Int]) = {
     val position = Vector2d(0.0, 0.0)
     val speed    = direction.toDouble
-    val state    = MaterialParticleState(position, speed, 0)
+    val state    = MaterialParticleState(position, speed, System.currentTimeMillis)
     val result   = squareLines.flatMap(state.detectNearestCollision)
     result must not be empty
   }
@@ -43,7 +43,7 @@ class MaterialParticleStateSpec extends Specification {
   private def shouldCollideWith(direction: Vector2d[Int], line: LineSegment[Double], expectedTime: Double) = {
     val position = Vector2d(0.0, 0.0)
     val speed    = direction.toDouble
-    val state    = MaterialParticleState(position, speed, 0)
+    val state    = MaterialParticleState(position, speed, System.currentTimeMillis)
     val result   = state.detectNearestCollision(line)
     result must beSome (expectedTime)
   }

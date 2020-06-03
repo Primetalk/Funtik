@@ -1,8 +1,8 @@
 package ru.primetalk.funtik.environment.solid
 
 import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector2d, lines2d}
-import squants.space.{Length, LengthUnit, Meters}
-import squants.time.{Seconds, Time, TimeUnit}
+import squants.space.{Length, Meters}
+import squants.time.{Seconds, Time}
 import spire.syntax.all._
 import ru.primetalk.funtik.environment.geom2d.Vector._
 import ru.primetalk.funtik.environment.geom2d.lines2d.ParametricLine
@@ -22,6 +22,8 @@ object SolidBodyModel {
     def trajectory: ParametricLine[Double] = ParametricLine(position, speed)
     /** Calculate new position in time = t1. */
     def integrate(t1: Double): MaterialParticleState = {
+      val newPos = position + (speed :* (t1 - t))
+      println(s"Material newPos $newPos; $t1 - $t ")
       MaterialParticleState(
         position = position + (speed :* (t1 - t)),
         speed = speed,
@@ -38,9 +40,7 @@ object SolidBodyModel {
       case CollisionShape.LineSegment(p1, p2) =>
         val l2 = lines2d.TwoPointsLine(p1, p2).toParametricLineDouble
         lines2d.intersection(trajectory, l2).flatMap{ case (t1, t2) =>
-          Option.when(t1 > t &&
-            t2 >=0 && t2<=1 // we intersect between line segment ends
-          )(t1)
+          Option.when(t2 >= 0 && t2 <= 1)(t1) // we intersect between line segment ends
         }
       case CollisionShape.OrthogonalSquare(center, side) =>
         val x1 = center.x - side / 2

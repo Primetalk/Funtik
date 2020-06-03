@@ -54,6 +54,8 @@ trait RobotLoopT extends EnvironmentModel {
 
         (
           InternalRobotState(target, newPositionEstimate, sinceStartMs, currentSpeedEstimate, map),
+          Nil
+/*
           List(
             if (directionDifference._1 > 0) {
               SetSpeed(1 - 1 * directionDifference._1, 1)
@@ -61,6 +63,7 @@ trait RobotLoopT extends EnvironmentModel {
               SetSpeed(1, 1 - 1 * directionDifference._1)
             }
           )
+*/
         )
       }
     case (
@@ -68,8 +71,14 @@ trait RobotLoopT extends EnvironmentModel {
         HitObstacle()
         ) =>
       val newPositionEstimate = currentPositionEstimate // currentSpeedEstimate * (sinceStartMs - currentPositionTimeSinceStartMs).toInt
-      val x = Random.nextInt(2)
-      val y = Random.nextInt(2)
+
+      var x = Random.nextInt(2)
+      var y = Random.nextInt(2)
+
+      while(x == 0 && y == 0) {
+        x = Random.nextInt(2)
+        y = Random.nextInt(2)
+      }
       val newSpeed = SetSpeed(x, y)
       (InternalRobotState(target, newPositionEstimate, currentPositionTimeSinceStartMs, Vector(0, 0), map), List(newSpeed))
     case other => throw new IllegalArgumentException(s"Unsupported sensor data")
