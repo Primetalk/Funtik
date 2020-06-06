@@ -33,6 +33,9 @@ trait RobotLoopT extends EnvironmentModel {
     currentSpeedEstimate = Vector2d(0,0),
     map = Display[CellState](Rectangle(Vector2d(-10,-10), Vector2d(21,21)))
   )
+  def handleSensorDataIgnoreAll: (InternalRobotState, RobotSensorData) => (InternalRobotState, List[RobotCommand]) = {
+    case (irs, _) => (irs, Nil)
+  }
   // stateFlatMap
   def handleSensorData: (InternalRobotState, RobotSensorData) => (InternalRobotState, List[RobotCommand]) = {
     case (
