@@ -42,7 +42,10 @@ trait EnvironmentModel {
 //  case object UnidentifiedEnvironmentObject extends Content
 //  case object MovableObject extends Material
 
-  case class RobotEnvState(solidBodyState: SolidBodyState)
+  case class RobotEnvState(solidBodyState: SolidBodyState) {
+    def handleCommand(materialParticleStateCommand: MaterialParticleStateCommand): RobotEnvState =
+      RobotEnvState(solidBodyState.handleCommand(materialParticleStateCommand))
+  }
 
   case class WorldState[S](robotEnvState: RobotEnvState, robotInternalState: S, worldPointMap: WorldPointMap)
 

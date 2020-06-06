@@ -10,6 +10,15 @@ import Ordering.Double.TotalOrdering
 
 case class SystemOfUnits(length: Length = Meters(1), time: Time = Seconds(1))
 
+sealed trait MaterialParticleStateCommand
+
+object MaterialParticleStateCommand {
+  case class IntegrateUpToTime(t: Double) extends MaterialParticleStateCommand
+  case class SetSpeedAndAcceleration(
+    speed: Vector2d[Double],
+    orthogonalAcceleration: Double,
+  ) extends MaterialParticleStateCommand
+}
 /**
  * @param orthogonalAcceleration is orthogonal to the speed vector. If it's positive, then robot turns right,
  *                               if negative - left, if it's zero, robot is moving straight.
@@ -54,6 +63,13 @@ case class MaterialParticleState(position: Vector2d[Double], speed: Vector2d[Dou
 
   def setSpeed(t1: Double, speed: Vector2d[Double]): MaterialParticleState =
     integrate(t1).copy(speed = speed)
+
+  def handleCommand(materialParticleStateCommand: MaterialParticleStateCommand): MaterialParticleState = materialParticleStateCommand match {
+    case MaterialParticleStateCommand.IntegrateUpToTime(t) => integrate(t)
+    case MaterialParticleStateCommand.SetSpeedAndAcceleration(speed, orthogonalAcceleration) =>
+      copy(speed = speed, orthogonalAcceleration = orthogonalAcceleration)
+  }
+
 }
 
 /** State of a solid body includes angle theta and the speed at which this angle is changing. */
@@ -67,8 +83,13 @@ case class SolidBodyState(materialParticle: MaterialParticleState, theta: Double
     )
   }
 
-  //    def setOmega(t1: Double, omega: Double): SolidBodyState =
-  //      integrate(t1).copy(omega = omega)
+  def handleCommand(materialParticleStateCommand: MaterialParticleStateCommand): SolidBodyState = {
+    val materialParticleState2 = materialParticle.handleCommand(materialParticleStateCommand)
+    SolidBodyState(
+      materialParticle = materialParticleState2,
+      theta = materialParticleState2.speed.toPolar.theta
+    )
+  }
 
 }
 case class RobotGeometry(width: Double, wheelRadius: Double){
