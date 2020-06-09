@@ -91,6 +91,11 @@ trait EnvironmentModel {
     */
   case class GyroscopeInfo(rotation: Vector3dDouble, acceleration: Vector3dDouble, magneticField: Vector3dDouble) extends RobotSensorData
 
+  /** This is a magical sensor information that reports exact speed of the robot.
+   * This should be superseded with just GyroscopeInfo.
+   * */
+  case class MagicalSpeedSensor(speed: Vector2d[Double]) extends RobotSensorData
+
   sealed trait RobotCommand
   /**
    * Set speed of left and right motors. Range of speed is [0.0, 1.0].
