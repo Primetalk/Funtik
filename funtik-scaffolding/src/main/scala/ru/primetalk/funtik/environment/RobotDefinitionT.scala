@@ -12,6 +12,7 @@ trait DefaultRobotDefinition extends RobotDefinitionT {
   override val robot: RobotGeometry = RobotGeometry(
     width = Centimeters(20)/su.length,
     wheelRadius = Centimeters(5.7)/su.length,
+    maxOmega = 20.0
   )
 
 }

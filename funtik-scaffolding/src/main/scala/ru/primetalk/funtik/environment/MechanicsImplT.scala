@@ -14,26 +14,26 @@ import ru.primetalk.funtik.environment.geom2d.DoublePrecision.DoubleCompareOps
 
 trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
 
-  sealed trait RobotEnvCommand
-  object RobotEnvCommand {
-    case class SetWheelSpeed(left: Double, right: Double) extends RobotEnvCommand
-    case class IntegrateUpToTime(t: Double) extends RobotEnvCommand
-  }
+//  sealed trait RobotEnvCommand
+//  object RobotEnvCommand {
+//    case class SetWheelSpeed(leftFraction: Double, rightFraction: Double) extends RobotEnvCommand
+//    case class IntegrateUpToTime(t: Double) extends RobotEnvCommand
+//  }
+//
+//  def handleCommandOnEnvState(robotEnvState: RobotEnvState, robotEnvCommand: RobotEnvCommand): RobotEnvState = robotEnvCommand match {
+//    case RobotEnvCommand.SetWheelSpeed(leftFraction, rightFraction) =>
+//      val SolidBodyRotationParameters(tangentialVelocity, orthogonalAcceleration) = robot.convertTwoWheelsSpeedToSpeedAndOmega(leftFraction, rightFraction)
+//      robotEnvState.handleCommand(MaterialParticleStateCommand.
+//        SetSpeedAndAcceleration(
+//          speed = robotEnvState.solidBodyState.materialParticle.speed.withLength(tangentialVelocity),
+//          orthogonalAcceleration = orthogonalAcceleration,
+//        )
+//      )
+//    case RobotEnvCommand.IntegrateUpToTime(t) =>
+//      robotEnvState.handleCommand(MaterialParticleStateCommand.IntegrateUpToTime(t))
+//  }
 
-  def handleCommandOnEnvState(robotEnvState: RobotEnvState, robotEnvCommand: RobotEnvCommand): RobotEnvState = robotEnvCommand match {
-    case RobotEnvCommand.SetWheelSpeed(left, right) =>
-      val SolidBodyRotationParameters(tangentialVelocity, orthogonalAcceleration) = robot.convertTwoWheelsSpeedToSpeedAndOmega(left, right)
-      robotEnvState.handleCommand(MaterialParticleStateCommand.
-        SetSpeedAndAcceleration(
-          speed = robotEnvState.solidBodyState.materialParticle.speed.withLength(tangentialVelocity),
-          orthogonalAcceleration = orthogonalAcceleration,
-        )
-      )
-    case RobotEnvCommand.IntegrateUpToTime(t) =>
-      robotEnvState.handleCommand(MaterialParticleStateCommand.IntegrateUpToTime(t))
-  }
-
-  class MechanicsImpl[S](val robotStrategy: RobotStrategy[S], val initialRobotState: S) extends ModelMechanics[S] {
+  class MechanicsImpl[S](val robotStrategy: RobotStrategy[S]) extends ModelMechanics[S] {
 
     private def toPoints: Tree[Rectangle] => List[Vector2d[Int]] =
       Tree.eliminate[Rectangle, List[Position]](_.edges)(_ reverse_::: _)
@@ -54,8 +54,8 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
             RobotEnvState(SolidBodyState(
               MaterialParticleState(
                 position = Vector2d(10.0, 10.0),
-                speed = Vector2d(0.0, 2.0),
-                orthogonalAcceleration = -0.3,
+                speed = Vector2d(0.0, 0.0),
+                orthogonalAcceleration = 0.0,
                 t = Milliseconds(wallTimeMs) / su.time
               ),
               theta = 0.0)),
@@ -88,8 +88,10 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
         integrate(state.copy(
           robotInternalState = robotState1,
         ), tail ::: commandsR, targetTime)
-      case util.Left(either) :: tail =>
-        integrate(handleCommand(state, either), tail, targetTime)
+      case util.Left(particleOrRobotCommand) :: tail =>
+        val state1 = handleCommand(state, particleOrRobotCommand)
+        val speed = state1.robotEnvState.solidBodyState.materialParticle.speed
+        integrate(state1, util.Right(MagicalSpeedSensor(speed)) :: tail, targetTime)
       case Nil =>
         if(state.robotEnvState.solidBodyState.materialParticle.t ~= targetTime) {
           state
@@ -115,7 +117,9 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
 
     def handleCommand(state: WorldState[S], cmd: Either[MaterialParticleStateCommand, RobotCommand]): WorldState[S] = cmd match {
       case util.Left(materialParticleStateCommand) =>
-        state.copy(robotEnvState = state.robotEnvState.handleCommand(materialParticleStateCommand))
+        val robotEnvState = state.robotEnvState.handleCommand(materialParticleStateCommand)
+        val robotInternalState = state.robotInternalState
+        state.copy(robotEnvState = robotEnvState, robotInternalState = robotInternalState)
       case util.Right(SetSpeed(left, right)) =>
         val SolidBodyRotationParameters(speed, accel) = robot.convertTwoWheelsSpeedToSpeedAndOmega(left, right)
         val v = state.robotEnvState.solidBodyState.materialParticle.speed.withLength(speed)
