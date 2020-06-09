@@ -3,7 +3,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 lazy val commonSettings = Seq(
   organization := "ru.primetalk",
   version := "0.1.0-SNAPSHOT", //
-  scalaVersion := "2.13.1",
+  scalaVersion := "2.13.2",
   scalacOptions ++= Seq(
     "-Ymacro-annotations",// required for simulacrum starting from Scala 2.13+
     "-deprecation",
@@ -27,7 +27,9 @@ lazy val environment =
       "org.typelevel" %%% "algebra" % "2.0.0",
       "org.typelevel" %%% "spire" % "0.17.0-M1",
       "org.typelevel" %%% "squants"  % "1.6.0",
+      "com.chuusai" %%% "shapeless" % "2.3.3",
       "org.specs2" %%% "specs2-core" % "4.8.3" % Test,
+
       "org.specs2" %%% "specs2-scalacheck" % "4.8.3" % Test
     )
   ).jvmSettings(
@@ -36,6 +38,7 @@ lazy val environment =
       "org.typelevel" %% "algebra" % "2.0.0",
       "org.typelevel" %% "spire" % "0.17.0-M1",
       "org.typelevel"  %% "squants"  % "1.6.0",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       "org.specs2" %% "specs2-core" % "4.8.3" % Test,
       "org.specs2" %% "specs2-scalacheck" % "4.8.3" % Test
     )

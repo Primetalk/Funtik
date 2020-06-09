@@ -35,7 +35,7 @@ trait ControllerT extends ViewWorldStateT {
       def newStateAvailable: ((WorldState, Duration)) => Unit = {
         case (state, duration) =>
           state.render(ctx)
-          timers.setTimeout(duration.toMillis) {
+          timers.setTimeout(duration.toMillis.toDouble) {
             val timePassed = ScaffoldingTimePassed(realTimeMs)
             randomStream = modelMechanics.handleEvent(state, timePassed).
               map(newStateAvailable).

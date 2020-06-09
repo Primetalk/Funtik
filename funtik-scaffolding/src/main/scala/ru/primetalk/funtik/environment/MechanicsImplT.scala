@@ -7,6 +7,7 @@ import ru.primetalk.funtik.environment.generator.{BSPTree, Tree}
 import ru.primetalk.funtik.environment.geom2d.Geom2dUtils._
 import cats.data.State
 import ru.primetalk.funtik.environment.geom2d.Vector2d
+import ru.primetalk.funtik.environment.solid._
 import ru.primetalk.funtik.environment.solid.SolidBodyModel._
 import squants.time.Milliseconds
 
@@ -22,7 +23,7 @@ trait MechanicsImplT extends EnvironmentModel {
         Display.showPoints(points, true, false)
       }
 
-    val defaultDuration: FiniteDuration = 400.milliseconds
+    val defaultDuration: FiniteDuration = 40.milliseconds
 
     /** the returned Duration is the next event */
     override def start(wallTimeMs: Long): State[RandomStateValue, (WorldState, Duration)] = {
@@ -30,8 +31,14 @@ trait MechanicsImplT extends EnvironmentModel {
       generateDisplay(rect).map { display =>
         (
           WorldState(
-            RobotEnvState(SolidBodyState(MaterialParticleState(Vector2d(1.0, 1.0), Vector2d(0.0, 1.0),
-              Milliseconds(wallTimeMs) / su.time), 0.0, 0.1)),
+            RobotEnvState(SolidBodyState(
+              MaterialParticleState(
+                position = Vector2d(10.0, 10.0),
+                speed = Vector2d(0.0, 2.0),
+                orthogonalAcceleration = -0.3,
+                t = Milliseconds(wallTimeMs) / su.time
+              ),
+              theta = 0.0)),
             display
           ),
           defaultDuration
