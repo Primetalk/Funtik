@@ -38,7 +38,11 @@ object Vector {
     def length: Double = math.hypot(v.x, v.y)
     def normalized: Vector2d[Double] = {
       val rr = length
-      Vector2d(v.x / rr, v.y / rr)
+      if(rr == 0.0)
+        v
+      else
+        Vector2d(v.x / rr, v.y / rr)
+
     }
     def /(k: Double): Vector2d[Double] = Vector2d(v.x / k, v.y / k)
 
