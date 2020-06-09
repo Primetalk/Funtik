@@ -85,49 +85,17 @@ case class SolidBodyState(materialParticle: MaterialParticleState, theta: Double
 
   def handleCommand(materialParticleStateCommand: MaterialParticleStateCommand): SolidBodyState = {
     val materialParticleState2 = materialParticle.handleCommand(materialParticleStateCommand)
+    val polar = materialParticleState2.speed.toPolar
+    val theta1 = if(polar.r == 0.0) theta else polar.theta
+
     SolidBodyState(
       materialParticle = materialParticleState2,
-      theta = materialParticleState2.speed.toPolar.theta
+      theta = theta1
     )
   }
 
 }
-case class RobotGeometry(width: Double, wheelRadius: Double){
 
-  /**
-   * Robot has two wheels. We know their radius and the distance between them.
-   * Rotational speed of wheels - radians per second - is given.
-   * We want to find linear (tangential) speed and rotational speed of the robot.
-   * leftLinearSpeed = wheelRadius*leftOmega
-   *
-   * radius is positive when robot rotates to left (counter clockwise)
-   * otherwise it is negative.
-   * @return
-   */
-  def convertTwoWheelsSpeedToSpeedAndOmega(leftOmega: Double, rightOmega: Double): SolidBodyRotationParameters = {
-    val leftLinearSpeed = wheelRadius * leftOmega
-    val rightLinearSpeed = wheelRadius * rightOmega
-    val linearVelocity1 = (leftLinearSpeed + rightLinearSpeed) / 2
-    if(leftOmega == rightOmega) {
-      SolidBodyRotationParameters(linearVelocity1, 0.0)
-    } else {
-      // Proportion:
-      // rLeft / (rLeft + wheelsDistance) = left / right
-      // rLeft (1 - left/right) = left/right * wheelsDistance
-      // rLeft = left/(right - left) * wheelsDistance
-
-      // r = leftOmega / (rightOmega - leftOmega) * wheelsDistance
-
-      // rCenter = rLeft + wheelsDistance / 2 = (left + right) / (right - left)* wheelsDistance
-      // a = V^2/rCenter = V^2 * (right - left) / (left + right) / wheelsDistance
-      val acceleration = linearVelocity1 * linearVelocity1 * (rightOmega - leftOmega) / (leftOmega + rightOmega) / width
-      SolidBodyRotationParameters(
-        tangentialVelocity = linearVelocity1,
-        orthogonalAcceleration = acceleration
-      )
-    }
-  }
-}
 case class SolidBodyRotationParameters(tangentialVelocity: Double, orthogonalAcceleration: Double)
 
 /**
