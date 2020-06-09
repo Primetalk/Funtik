@@ -38,7 +38,11 @@ object Vector {
     def length: Double = math.hypot(v.x, v.y)
     def normalized: Vector2d[Double] = {
       val rr = length
-      Vector2d(v.x / rr, v.y / rr)
+      if(rr == 0.0)
+        v
+      else
+        Vector2d(v.x / rr, v.y / rr)
+
     }
     def /(k: Double): Vector2d[Double] = Vector2d(v.x / k, v.y / k)
 
@@ -49,6 +53,11 @@ object Vector {
       val p = toPolar
       p.copy(theta = p.theta + alpha).toVector2d
     }
+    def withLength(l: Double): Vector2d[Double] = {
+      val p = toPolar
+      p.copy(r = l).toVector2d
+    }
+
   }
 
   implicit object vector2dIntByAxis extends Vector2dIntByAxis[Vector2d[Int]] {
