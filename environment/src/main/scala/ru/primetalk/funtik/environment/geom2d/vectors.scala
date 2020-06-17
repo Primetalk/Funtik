@@ -13,6 +13,11 @@ case class Vector2d[@sp(Int, Double) Axis](x: Axis, y: Axis) extends Vector[Axis
   def toTuple: (Axis, Axis) = (x, y)
 }
 
+object Vector2d {
+  def direction(theta: Double): Vector2d[Double] =
+    Vector2dPolar(1, theta).toVector2d
+}
+
 case class Vector3d[@sp(Int, Double) Axis](x: Axis, y: Axis, z: Axis) extends Vector[Axis, 3] {
   def _1: Axis = x
   def _2: Axis = y
