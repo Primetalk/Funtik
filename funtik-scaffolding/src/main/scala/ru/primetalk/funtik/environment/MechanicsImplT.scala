@@ -43,12 +43,21 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
         Display.showPoints(points, true, false)
       }
 
+    def rectToCollisionShape(rectangle: Rectangle): List[CollisionShape[Double]] =
+      CollisionShape.rectangle(rectangle.topLeft.toDouble, rectangle.bottomRight.toDouble).toList
+
+    private def toCollisionShapes: Tree[Rectangle] => List[CollisionShape[Double]] =
+      Tree.eliminate[Rectangle, List[CollisionShape[Double]]](rectToCollisionShape)(_ reverse_::: _)
+
+    def generateWorld(rect: Rectangle): State[RandomStateValue, WorldCollisionShapes] =
+      BSPTree()(rect).map(toCollisionShapes)
+
     val defaultDuration: FiniteDuration = 40.milliseconds
 
     /** the returned Duration is the next event */
     override def start(wallTimeMs: Long, internalState0: S): State[RandomStateValue, (WorldState[S], Duration)] = {
       val rect = Rectangle(Vector2d(-40, -30), Vector2d(80, 60))
-      generateDisplay(rect).map { display =>
+      generateWorld(rect).map { world =>
         (
           WorldState[S](
             RobotEnvState(SolidBodyState(
@@ -60,7 +69,7 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
               ),
               theta = 0.0)),
             internalState0,
-            display
+            world
           ),
           defaultDuration
         )
@@ -96,7 +105,7 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
         if(state.robotEnvState.solidBodyState.materialParticle.t ~= targetTime) {
           state
         } else {
-          val minTimeOpt = findNearestCollisionTime(state.robotEnvState.solidBodyState, state.worldPointMap)
+          val minTimeOpt = findNearestCollisionTime(state.robotEnvState.solidBodyState, state.worldCollisionShapes)
           val t1 = (targetTime :: minTimeOpt.toList).min // it's either collision or modelling duration.
           val t1ms = (t1 * su.time).millis
           val listOfCommands: List[Either[Either[MaterialParticleStateCommand, RobotCommand], RobotSensorData]] =  List(
@@ -127,8 +136,8 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
     }
   }
 
-  private def findNearestCollisionTime[S](solidBodyState: SolidBodyState, worldPointMap: WorldPointMap) = {
-    worldPointMapToCollisionShapes(worldPointMap).
+  private def findNearestCollisionTime[S](solidBodyState: SolidBodyState, worldPointMap: WorldCollisionShapes) = {
+    worldPointMap.
       flatMap(solidBodyState.materialParticle.detectNearestCollision).
       map(_.t).
       minOption

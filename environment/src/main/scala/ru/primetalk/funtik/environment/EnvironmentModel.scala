@@ -1,8 +1,9 @@
 package ru.primetalk.funtik.environment
 
 import cats.data.State
+import ru.primetalk.funtik.environment.Lidar.LidarSamples
 import ru.primetalk.funtik.environment.generator.utils.Random.RandomStateValue
-import ru.primetalk.funtik.environment.geom2d.{Vector2d, Vector3d}
+import ru.primetalk.funtik.environment.geom2d.{CollisionShape, Vector2d, Vector3d}
 import ru.primetalk.funtik.environment.solid._
 
 import scala.concurrent.duration.Duration
@@ -30,6 +31,7 @@ trait EnvironmentModel {
   }
   type PointMap = Map[Point2D, PassByStatistics]
   type WorldPointMap = Display[Boolean]
+  type WorldCollisionShapes = List[CollisionShape[Double]]
 //  type WorldPointMap = Map[Point2D, Boolean] // Boolean - wall/free
 //  sealed trait ObjectAtPosition
 //  sealed trait Material extends ObjectAtPosition
@@ -47,7 +49,7 @@ trait EnvironmentModel {
       RobotEnvState(solidBodyState.handleCommand(materialParticleStateCommand))
   }
 
-  case class WorldState[S](robotEnvState: RobotEnvState, robotInternalState: S, worldPointMap: WorldPointMap)
+  case class WorldState[S](robotEnvState: RobotEnvState, robotInternalState: S, worldCollisionShapes: WorldCollisionShapes)
 
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)
@@ -95,6 +97,9 @@ trait EnvironmentModel {
    * This should be superseded with just GyroscopeInfo.
    * */
   case class MagicalSpeedSensor(speed: Vector2d[Double]) extends RobotSensorData
+
+  /** Information about surrounding area in the form of lidar samples. */
+  case class LidarInfo(samples: LidarSamples) extends RobotSensorData
 
   sealed trait RobotCommand
   /**

@@ -16,7 +16,6 @@ lazy val commonSettings = Seq(
   scalacOptions in Test ++= Seq("-Yrangepos")
 )
 
-// TODO: use sbt-crossproject plugin
 lazy val environment =
   (crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure) in file("environment")).settings(
   commonSettings,
