@@ -10,8 +10,8 @@ trait ViewWorldStateT extends ViewWorldMap with EnvironmentModel {
 
     override def render(worldState: WorldState[S], ctx: CanvasRenderingContext2D): Unit = {
       ctx.beginPath()
-      worldState.worldPointMap.render(ctx)
-      setTransform(worldState.worldPointMap, ctx)
+      worldState.worldPointMapCache.render(ctx)
+      setTransform(worldState.worldPointMapCache, ctx)
       ctx.strokeStyle = Color.Red.toString()
       ctx.lineWidth = 0.3
       ctx.fillStyle = Color.Red.toString()

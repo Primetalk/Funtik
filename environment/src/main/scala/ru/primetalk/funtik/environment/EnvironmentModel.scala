@@ -32,6 +32,10 @@ trait EnvironmentModel {
   type PointMap = Map[Point2D, PassByStatistics]
   type WorldPointMap = Display[Boolean]
   type WorldCollisionShapes = List[CollisionShape[Double]]
+  def convertWorldCollisionShapesToWorldPointMap(worldCollisionShapes: WorldCollisionShapes): WorldPointMap = {
+    val points = worldCollisionShapes.flatMap(CollisionShape.toPoints(_))
+    Display.showPoints(points, true, false)
+  }
 //  type WorldPointMap = Map[Point2D, Boolean] // Boolean - wall/free
 //  sealed trait ObjectAtPosition
 //  sealed trait Material extends ObjectAtPosition
@@ -49,7 +53,7 @@ trait EnvironmentModel {
       RobotEnvState(solidBodyState.handleCommand(materialParticleStateCommand))
   }
 
-  case class WorldState[S](robotEnvState: RobotEnvState, robotInternalState: S, worldCollisionShapes: WorldCollisionShapes)
+  case class WorldState[S](robotEnvState: RobotEnvState, robotInternalState: S, worldCollisionShapes: WorldCollisionShapes, worldPointMapCache: WorldPointMap)
 
   case class RobotState(position: Point2D, rotation: Double, pointMap: PointMap,
                         placeMap: PlaceMap)

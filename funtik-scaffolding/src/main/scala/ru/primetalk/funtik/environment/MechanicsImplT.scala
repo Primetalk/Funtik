@@ -69,7 +69,8 @@ trait MechanicsImplT extends EnvironmentModel with RobotDefinitionT {
               ),
               theta = 0.0)),
             internalState0,
-            world
+            world,
+            convertWorldCollisionShapesToWorldPointMap(world),
           ),
           defaultDuration
         )
